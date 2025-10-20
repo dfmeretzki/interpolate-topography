@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.25)
 project(interpol_topography LANGUAGES C)
 
 set(SOURCE_FILES
+    src/config_file.c
     src/main.c
 )
 
