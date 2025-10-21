@@ -4,6 +4,7 @@ project(interpol_topography LANGUAGES C)
 set(SOURCE_FILES
     src/config_file.c
     src/main.c
+    src/utils.c
 )
 
 add_executable(interpol_topography ${SOURCE_FILES})

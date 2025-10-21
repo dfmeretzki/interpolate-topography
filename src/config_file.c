@@ -8,23 +8,13 @@
     configuration file
 */
 
-#include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "config_file.h"
-
-void removeSpaces(char* s)
-{
-    char* x = s;
-    do
-    {
-        while (isspace(*x)) ++x;
-    }
-    while (*s++ = *x++);
-}
+#include "utils.h"
 
 int parseLine(const char* restrict line, char* restrict key, char* restrict value)
 {
