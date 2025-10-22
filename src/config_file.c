@@ -4,7 +4,7 @@
     Date: 2025-10-20
 
     Description:
-    This file contains the implementation of the functions to read and parse the
+    This file contains the definition of the functions to read and parse the
     configuration file
 */
 
@@ -16,7 +16,7 @@
 #include "config_file.h"
 #include "utils.h"
 
-int parseLine(const char* restrict line, char* restrict key, char* restrict value)
+static int parseLine(const char* restrict line, char* restrict key, char* restrict value)
 {
     if (sscanf(line, "%[^=] = %[^\n]", key, value) == 2)
     {
@@ -31,7 +31,7 @@ int parseLine(const char* restrict line, char* restrict key, char* restrict valu
     }
 }
 
-void parseArray(char* value, int* arr, int size)
+static void parseArray(char* value, int* arr, int size)
 {
     char* token = strtok(value, ",");
     int i = 0;
@@ -43,7 +43,7 @@ void parseArray(char* value, int* arr, int size)
     }
 }
 
-void storeValue(const char* restrict key, char* restrict value, ConfigFile* config)
+static void storeValue(const char* restrict key, char* restrict value, ConfigFile* config)
 {
     if (strcmp("skinMeshFileIn", key) == 0)
     {

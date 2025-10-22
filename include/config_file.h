@@ -4,7 +4,7 @@
     Date: 2025-10-20
 
     Description:
-    This file contains the definition of the configuration file and the
+    This file contains the declaration of the configuration file and the
     functions to read and parse the file
 */
 

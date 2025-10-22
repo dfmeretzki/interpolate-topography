@@ -1,12 +1,27 @@
 cmake_minimum_required(VERSION 3.25)
 project(interpol_topography LANGUAGES C)
 
-set(SOURCE_FILES
-    src/config_file.c
-    src/main.c
-    src/utils.c
-)
+option(TESTING "Enable testing" ON)
 
-add_executable(interpol_topography ${SOURCE_FILES})
+if(TESTING)
+	enable_testing()
+endif()
+
+add_library(compiler_flags INTERFACE)
+target_compile_features(compiler_flags INTERFACE c_std_17)
+
+add_executable(interpol_topography src/main.c)
+
+
+add_subdirectory(src)
 
 target_include_directories(interpol_topography PUBLIC include)
+
+target_link_libraries(interpol_topography PUBLIC
+    compiler_flags
+    interpol_topography_lib
+)
+
+if(TESTING)
+	add_subdirectory(tests)
+endif()
