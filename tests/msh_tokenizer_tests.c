@@ -9,6 +9,7 @@
 
 
 #include <stdio.h>
+#include <string.h>
 
 #include "msh_tokenizer.h"
 
@@ -210,6 +211,37 @@ static int tokenizerTests()
             return 1;
         }
         freeTokenizer(&tokenizer);
+    }
+    {
+        // Test token to type value mapping
+        if (strcmp(tokenTypeToValue(TOKEN_V1_NOD_START), "$NOD") != 0) {
+            printf("Expected $NOD but found %s", tokenTypeToValue(TOKEN_V1_NOD_START));
+            return 1;
+        }
+        if (strcmp(tokenTypeToValue(TOKEN_V1_NOD_END), "$ENDNOD") != 0) {
+            printf("Expected $ENDNOD but found %s", tokenTypeToValue(TOKEN_V1_NOD_END));
+            return 1;
+        }
+        if (strcmp(tokenTypeToValue(TOKEN_V1_ELM_START), "$ELM") != 0) {
+            printf("Expected $ELM but found %s", tokenTypeToValue(TOKEN_V1_ELM_START));
+            return 1;
+        }
+        if (strcmp(tokenTypeToValue(TOKEN_V1_ELM_END), "$ENDELM") != 0) {
+            printf("Expected $ENDELM but found %s", tokenTypeToValue(TOKEN_V1_ELM_END));
+            return 1;
+        }
+        if (strcmp(tokenTypeToValue(TOKEN_NUMBER), "number") != 0) {
+            printf("Expected number but found %s", tokenTypeToValue(TOKEN_NUMBER));
+            return 1;
+        }
+        if (strcmp(tokenTypeToValue(TOKEN_END_OF_FILE), "end of file") != 0) {
+            printf("Expected end of file but found %s", tokenTypeToValue(TOKEN_END_OF_FILE));
+            return 1;
+        }
+        if (strcmp(tokenTypeToValue(TOKEN_ERROR), "error") != 0) {
+            printf("Expected error but found %s", tokenTypeToValue(TOKEN_ERROR));
+            return 1;
+        }
     }
 
     return 0;

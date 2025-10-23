@@ -1,5 +1,7 @@
 add_library(interpol_topography_lib
     config_file.c
+    mesh.c
+    msh_parser.c
     msh_tokenizer.c
     utils.c
 )

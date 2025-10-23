@@ -144,3 +144,24 @@ Token nextToken(Tokenizer* tokenizer)
 
     return unexpectedCharacter(tokenizer, peek(tokenizer));
 }
+
+char* tokenTypeToValue(TokenType type)
+{
+    switch (type)
+    {
+    case TOKEN_V1_NOD_START:
+        return "$NOD";
+    case TOKEN_V1_NOD_END:
+        return "$ENDNOD";
+    case TOKEN_V1_ELM_START:
+        return "$ELM";
+    case TOKEN_V1_ELM_END:
+        return "$ENDELM";
+    case TOKEN_NUMBER:
+        return "number";
+    case TOKEN_END_OF_FILE:
+        return "end of file";
+    case TOKEN_ERROR:
+        return "error";
+    }
+}

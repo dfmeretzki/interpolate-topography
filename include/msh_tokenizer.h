@@ -16,6 +16,11 @@
 
 #define MSH_SPEC_SIZE 5
 
+typedef enum {
+    MSH_V1,
+    MSH_UNKNOWN_VERSION
+} MSHVersion;
+
 typedef enum
 {
     TOKEN_V1_NOD_START,         // $NOD
@@ -51,5 +56,7 @@ void freeTokenizer(Tokenizer* tokenizer);
 void resetTokenizer(Tokenizer* tokenizer, const char* source);
 
 Token nextToken(Tokenizer* tokenizer);
+
+char* tokenTypeToValue(TokenType type);
 
 #endif // MSH_TOKENIZER_H
