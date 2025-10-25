@@ -3,6 +3,7 @@ add_library(interpol_topography_lib
     mesh.c
     msh_parser.c
     msh_tokenizer.c
+    topography_parser.c
     utils.c
 )
 target_include_directories(interpol_topography_lib PUBLIC 

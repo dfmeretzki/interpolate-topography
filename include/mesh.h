@@ -23,9 +23,9 @@ typedef struct
 
 typedef struct
 {
-    int type;                       // geometrical type of the element
-    int regPhys;                    // tag of the physical region
-    int regElem;                    // tag of the element region
+    unsigned int type;              // geometrical type of the element
+    unsigned int regPhys;           // tag of the physical region
+    unsigned int regElem;           // tag of the element region
     size_t nNodes;                  // number of nodes of the element
     size_t nodes[MAX_ELEM_NODES];   // indexes of the nodes of the element
 } Element;
@@ -41,6 +41,17 @@ typedef struct
     Element* elements;      // array of elements in the mesh
 } Mesh;
 
+typedef struct
+{
+    size_t nx;                  // number of x-values on the grid
+    size_t ny;                  // number of y-values on the grid
+    double* xGrid;              // x-topography grid
+    double* yGrid;              // y-topography grid
+    double* values;             // topography values
+} Topography;
+
 void freeMesh(Mesh* mesh);
 
-#endif
+void freeTopography(Topography* topo);
+
+#endif // MESH_H

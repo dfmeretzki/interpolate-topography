@@ -223,15 +223,15 @@ static int parseElmStart(Parser* parser, Mesh* mesh)
 
         // Read element type
         if (!eatToken(parser, TOKEN_NUMBER)) return 0;
-        int type = atoi(parser->token.start);
+        unsigned int type = atoi(parser->token.start);
 
         // Read physical region
         if (!eatToken(parser, TOKEN_NUMBER)) return 0;
-        int regPhys = atoi(parser->token.start);
+        unsigned int regPhys = atoi(parser->token.start);
 
         // Read element region
         if (!eatToken(parser, TOKEN_NUMBER)) return 0;
-        int regElem = atoi(parser->token.start);
+        unsigned int regElem = atoi(parser->token.start);
 
         // Read number of nodes
         if (!eatToken(parser, TOKEN_NUMBER)) return 0;
