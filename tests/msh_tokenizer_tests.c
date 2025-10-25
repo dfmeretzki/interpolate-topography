@@ -62,6 +62,7 @@ static int tokenizerTests()
             {
                 printf("Found token type %s while expecting %s",
                     typeToString(t.type), typeToString(r[i]));
+                freeTokenizer(&tokenizer);
                 return 1;
             }
             ++i;
@@ -84,6 +85,7 @@ static int tokenizerTests()
             {
                 printf("Extracted token value %.*s while expecting %s",
                     (int)t.length, t.start, r[i]);
+                freeTokenizer(&tokenizer);
                 return 1;
             }
             ++i;
@@ -105,6 +107,7 @@ static int tokenizerTests()
             if (t.line != r[i])
             {
                 printf("Found token line %zu while expecting %zu", t.line, r[i]);
+                freeTokenizer(&tokenizer);
                 return 1;
             }
             ++i;
@@ -122,8 +125,10 @@ static int tokenizerTests()
         if (t.type != TOKEN_ERROR)
         {
             printf("Expected TOKEN_ERROR but found %s", typeToString(t.type));
+            freeTokenizer(&tokenizer);
             return 1;
         }
+        freeTokenizer(&tokenizer);
     }
     {
         // Test reset tokenizer
@@ -139,6 +144,7 @@ static int tokenizerTests()
             || t3.type != TOKEN_V1_ELM_START)
         {
             printf("Tokenizer reset failed");
+            freeTokenizer(&tokenizer);
             return 1;
         }
         freeTokenizer(&tokenizer);
@@ -152,6 +158,7 @@ static int tokenizerTests()
         if (t.type != TOKEN_END_OF_FILE)
         {
             printf("Expected TOKEN_END_OF_FILE but found %s", typeToString(t.type));
+            freeTokenizer(&tokenizer);
             return 1;
         }
         freeTokenizer(&tokenizer);
@@ -165,6 +172,7 @@ static int tokenizerTests()
         if (t.type != TOKEN_END_OF_FILE)
         {
             printf("Expected TOKEN_END_OF_FILE but found %s", typeToString(t.type));
+            freeTokenizer(&tokenizer);
             return 1;
         }
         freeTokenizer(&tokenizer);
@@ -178,6 +186,7 @@ static int tokenizerTests()
         if (t.type != TOKEN_ERROR)
         {
             printf("Expected TOKEN_ERROR but found %s", typeToString(t.type));
+            freeTokenizer(&tokenizer);
             return 1;
         }
         freeTokenizer(&tokenizer);
@@ -193,6 +202,7 @@ static int tokenizerTests()
             if (t.type != TOKEN_NUMBER)
             {
                 printf("Expected TOKEN_NUMBER but found %s", typeToString(t.type));
+                freeTokenizer(&tokenizer);
                 return 1;
             }
             char expected[3];
@@ -201,6 +211,7 @@ static int tokenizerTests()
             {
                 printf("Extracted token value %.*s while expecting %s",
                     (int)t.length, t.start, expected);
+                freeTokenizer(&tokenizer);
                 return 1;
             }
         }
@@ -208,37 +219,45 @@ static int tokenizerTests()
         if (t.type != TOKEN_END_OF_FILE)
         {
             printf("Expected TOKEN_END_OF_FILE but found %s", typeToString(t.type));
+            freeTokenizer(&tokenizer);
             return 1;
         }
         freeTokenizer(&tokenizer);
     }
     {
         // Test token to type value mapping
-        if (strcmp(tokenTypeToValue(TOKEN_V1_NOD_START), "$NOD") != 0) {
+        if (strcmp(tokenTypeToValue(TOKEN_V1_NOD_START), "$NOD") != 0)
+        {
             printf("Expected $NOD but found %s", tokenTypeToValue(TOKEN_V1_NOD_START));
             return 1;
         }
-        if (strcmp(tokenTypeToValue(TOKEN_V1_NOD_END), "$ENDNOD") != 0) {
+        if (strcmp(tokenTypeToValue(TOKEN_V1_NOD_END), "$ENDNOD") != 0)
+        {
             printf("Expected $ENDNOD but found %s", tokenTypeToValue(TOKEN_V1_NOD_END));
             return 1;
         }
-        if (strcmp(tokenTypeToValue(TOKEN_V1_ELM_START), "$ELM") != 0) {
+        if (strcmp(tokenTypeToValue(TOKEN_V1_ELM_START), "$ELM") != 0)
+        {
             printf("Expected $ELM but found %s", tokenTypeToValue(TOKEN_V1_ELM_START));
             return 1;
         }
-        if (strcmp(tokenTypeToValue(TOKEN_V1_ELM_END), "$ENDELM") != 0) {
+        if (strcmp(tokenTypeToValue(TOKEN_V1_ELM_END), "$ENDELM") != 0)
+        {
             printf("Expected $ENDELM but found %s", tokenTypeToValue(TOKEN_V1_ELM_END));
             return 1;
         }
-        if (strcmp(tokenTypeToValue(TOKEN_NUMBER), "number") != 0) {
+        if (strcmp(tokenTypeToValue(TOKEN_NUMBER), "number") != 0)
+        {
             printf("Expected number but found %s", tokenTypeToValue(TOKEN_NUMBER));
             return 1;
         }
-        if (strcmp(tokenTypeToValue(TOKEN_END_OF_FILE), "end of file") != 0) {
+        if (strcmp(tokenTypeToValue(TOKEN_END_OF_FILE), "end of file") != 0)
+        {
             printf("Expected end of file but found %s", tokenTypeToValue(TOKEN_END_OF_FILE));
             return 1;
         }
-        if (strcmp(tokenTypeToValue(TOKEN_ERROR), "error") != 0) {
+        if (strcmp(tokenTypeToValue(TOKEN_ERROR), "error") != 0)
+        {
             printf("Expected error but found %s", tokenTypeToValue(TOKEN_ERROR));
             return 1;
         }
