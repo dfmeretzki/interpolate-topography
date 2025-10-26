@@ -27,7 +27,7 @@ Spec spec[] = {
     { TOKEN_V1_NOD_END, "^\\$ENDNOD" },
     { TOKEN_V1_ELM_START, "^\\$ELM" },
     { TOKEN_V1_ELM_END, "^\\$ENDELM" },
-    { TOKEN_NUMBER, "^[-+]?([0-9]+\\.[0-9]*|[0-9]+)" },
+    { TOKEN_NUMBER, "^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?" },
 };
 
 

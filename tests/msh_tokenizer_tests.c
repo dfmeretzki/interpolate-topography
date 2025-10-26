@@ -49,9 +49,10 @@ static int tokenizerTests()
     {
         // Test tokens of MSH format v1
         Tokenizer tokenizer;
-        char* file = "\n $NOD12 -14.5 15$ENDNOD  \n$ELM$ENDELM   ";
+        char* file = "\n $NOD12 -14.5 15$ENDNOD-0.2365566E+04  \n$ELM$ENDELM   0.1152600E+07 ";
         TokenType r[] = { TOKEN_V1_NOD_START, TOKEN_NUMBER, TOKEN_NUMBER, TOKEN_NUMBER,
-            TOKEN_V1_NOD_END, TOKEN_V1_ELM_START, TOKEN_V1_ELM_END, TOKEN_END_OF_FILE };
+            TOKEN_V1_NOD_END, TOKEN_NUMBER, TOKEN_V1_ELM_START, TOKEN_V1_ELM_END,
+             TOKEN_NUMBER, TOKEN_END_OF_FILE };
         initTokenizer(&tokenizer, file);
         Token t;
         int i = 0;
@@ -73,8 +74,9 @@ static int tokenizerTests()
     {
         // Test token value extraction
         Tokenizer tokenizer;
-        char* file = "$NOD\n123 -45.67$ENDNOD$ELM0.001 100\n    $ENDELM";
-        char* r[] = { "$NOD", "123", "-45.67", "$ENDNOD", "$ELM", "0.001", "100", "$ENDELM", "\0" };
+        char* file = "$NOD\n123 -45.67$ENDNOD$ELM0.001 100\n    $ENDELM-0.2365566E+04";
+        char* r[] = { "$NOD", "123", "-45.67", "$ENDNOD", "$ELM", "0.001", "100",
+             "$ENDELM", "-0.2365566E+04", "\0" };
         initTokenizer(&tokenizer, file);
         Token t;
         int i = 0;
@@ -96,8 +98,8 @@ static int tokenizerTests()
     {
         // Test line counting
         Tokenizer tokenizer;
-        char* file = "\n$NOD\n123\n-45.67\n\n\n$ENDNOD\n$ELM\n0.001\n\n100\n$ENDELM";
-        size_t r[] = { 2, 3, 4, 7, 8, 9, 11, 12, 12 };
+        char* file = "\n$NOD\n123\n-45.67\n\n\n$ENDNOD\n$ELM\n0.001 -0.236E+3\n\n100\n$ENDELM";
+        size_t r[] = { 2, 3, 4, 7, 8, 9, 9, 11, 12, 12 };
         initTokenizer(&tokenizer, file);
         Token t;
         int i = 0;
