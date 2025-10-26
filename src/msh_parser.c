@@ -241,7 +241,8 @@ static int parseElmStart(Parser* parser, Mesh* mesh)
         for (size_t j = 0; j < nNodes; ++j)
         {
             if (!eatToken(parser, TOKEN_NUMBER)) return 0;
-            mesh->elements[elemIndex].nodes[j] = (size_t)atoll(parser->token.start);
+            // Subtract 1 to convert to 0-based index
+            mesh->elements[elemIndex].nodes[j] = (size_t)atoll(parser->token.start) - 1;
         }
 
         // Store element data
