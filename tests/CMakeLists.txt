@@ -30,3 +30,15 @@ target_link_libraries(topography_parser_tests PUBLIC
 	interpol_topography_lib
 )
 add_test(topography_parser_tests topography_parser_tests)
+
+add_executable(mesh_tests mesh_tests.c)
+target_include_directories(mesh_tests
+	INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+	PRIVATE ${CMAKE_SOURCE_DIR}/include
+)
+target_link_libraries(mesh_tests PUBLIC
+	compiler_flags
+	interpol_topography_lib
+	"$<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:Clang>>:m>"
+)
+add_test(mesh_tests mesh_tests)

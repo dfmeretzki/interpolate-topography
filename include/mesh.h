@@ -12,6 +12,8 @@
 
 #include <stddef.h>
 
+#include "config_file.h"
+
 #define MAX_ELEM_NODES 32
 
 typedef struct
@@ -33,12 +35,15 @@ typedef struct
 
 typedef struct
 {
-    size_t nNodes;          // number of nodes in the mesh
-    size_t* nodeIndex;      // index of each node in the mesh
-    Node* nodes;            // array of nodes in the mesh
-    size_t nElems;          // number of elements
-    size_t* elemIndex;      // index of each element in the mesh
-    Element* elements;      // array of elements in the mesh
+    size_t nNodes;              // number of nodes in the mesh
+    size_t* nodeIndex;          // index of each node in the mesh
+    Node* nodes;                // array of nodes in the mesh
+    size_t nElems;              // number of elements
+    size_t* elemIndex;          // index of each element in the mesh
+    Element* elements;          // array of elements in the mesh
+    unsigned char* mark;        // work array for marking elements
+    size_t triQuadCount;        // number of tri and quad elements
+    unsigned int maxElemNodes;  // maximum number of nodes per element
 } Mesh;
 
 typedef struct
@@ -53,5 +58,7 @@ typedef struct
 void freeMesh(Mesh* mesh);
 
 void freeTopography(Topography* topo);
+
+int interpolateTopography(const ConfigFile* config, const Topography* topo, Mesh* mesh);
 
 #endif // MESH_H

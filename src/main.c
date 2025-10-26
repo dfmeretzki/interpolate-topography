@@ -3,6 +3,7 @@
 
 #include "config_file.h"
 #include "msh_parser.h"
+#include "topography_parser.h"
 
 int main(int argc, char** argv)
 {
@@ -24,6 +25,25 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
 
+    // Parse the topography file
+    Topography topo = { 0 };
+    if (!readTopographyFile(config.topoFile, &topo))
+    {
+        fprintf(stderr, "Failed to parse topography file '%s'\n", config.topoFile);
+        freeMesh(&mesh);
+        exit(EXIT_FAILURE);
+    }
+
+    // Interpolate the topography onto the mesh
+    if (!interpolateTopography(&config, &topo, &mesh))
+    {
+        fprintf(stderr, "Failed to interpolate topography onto the mesh\n");
+        freeTopography(&topo);
+        freeMesh(&mesh);
+        exit(EXIT_FAILURE);
+    }
+
+    freeTopography(&topo);
     freeMesh(&mesh);
 
     return EXIT_SUCCESS;
