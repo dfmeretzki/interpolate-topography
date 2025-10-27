@@ -24,7 +24,7 @@ static int parserTests()
             {741400.0, 1152600.0, -6000.0},
             {741400.0, 1170000.0, -6000.0}
         };
-        int expectedElems[4][8] = {
+        size_t expectedElems[4][8] = {
             {1, 15, 0, 1, 1, 0, -1, -1},
             {2, 1, 0, 1, 2, 0, 1, -1},
             {3, 2, 0, 1, 3, 0, 1, 2},
@@ -43,11 +43,11 @@ static int parserTests()
             freeMesh(&mesh);
             return 1;
         }
-        for (int i = 0; i < 3; ++i)
+        for (size_t i = 0; i < 3; ++i)
         {
             if (mesh.nodeIndex[i] != i)
             {
-                printf("Node index %d mismatch: expected %d but found %zu\n",
+                printf("Node index %zu mismatch: expected %zu but found %zu\n",
                     i + 1, i, mesh.nodeIndex[i]);
                 freeMesh(&mesh);
                 return 1;
@@ -72,41 +72,41 @@ static int parserTests()
             freeMesh(&mesh);
             return 1;
         }
-        for (int i = 0; i < 4; ++i)
+        for (size_t i = 0; i < 4; ++i)
         {
             if (mesh.elements[i].type != expectedElems[i][1])
             {
-                printf("Element %d type mismatch: expected %d but found %d\n",
+                printf("Element %zu type mismatch: expected %zu but found %u\n",
                     i + 1, expectedElems[i][1], mesh.elements[i].type);
                 freeMesh(&mesh);
                 return 1;
             }
             if (mesh.elements[i].regPhys != expectedElems[i][2])
             {
-                printf("Element %d regPhys mismatch: expected %d but found %d\n",
+                printf("Element %zu regPhys mismatch: expected %zu but found %u\n",
                     i + 1, expectedElems[i][2], mesh.elements[i].regPhys);
                 freeMesh(&mesh);
                 return 1;
             }
             if (mesh.elements[i].regElem != expectedElems[i][3])
             {
-                printf("Element %d regElem mismatch: expected %d but found %d\n",
+                printf("Element %zu regElem mismatch: expected %zu but found %u\n",
                     i + 1, expectedElems[i][3], mesh.elements[i].regElem);
                 freeMesh(&mesh);
                 return 1;
             }
             if (mesh.elements[i].nNodes != expectedElems[i][4])
             {
-                printf("Element %d nNodes mismatch: expected %d but found %zu\n",
+                printf("Element %zu nNodes mismatch: expected %zu but found %zu\n",
                     i + 1, expectedElems[i][4], mesh.elements[i].nNodes);
                 freeMesh(&mesh);
                 return 1;
             }
-            for (int j = 0; j < mesh.elements[i].nNodes; ++j)
+            for (size_t j = 0; j < mesh.elements[i].nNodes; ++j)
             {
                 if (mesh.elements[i].nodes[j] != (size_t)expectedElems[i][5 + j])
                 {
-                    printf("Element %d node %d mismatch: expected %d but found %zu\n",
+                    printf("Element %zu node %zu mismatch: expected %zu but found %zu\n",
                         i + 1, j + 1, expectedElems[i][5 + j], mesh.elements[i].nodes[j]);
                     freeMesh(&mesh);
                     return 1;

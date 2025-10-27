@@ -8,7 +8,10 @@ if(TESTING)
 endif()
 
 add_library(compiler_flags INTERFACE)
-target_compile_features(compiler_flags INTERFACE c_std_17)
+target_compile_features(compiler_flags INTERFACE c_std_23)
+target_compile_options(compiler_flags INTERFACE
+    -Wall -Wextra -pedantic -Werror
+)
 
 add_executable(interpol_topography src/main.c)
 
