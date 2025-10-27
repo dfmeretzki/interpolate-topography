@@ -95,7 +95,8 @@ void initTokenizer(Tokenizer* tokenizer, const char* source)
     tokenizer->line = 1;
     for (int i = 0; i < MSH_SPEC_SIZE; ++i)
     {
-        if (regcomp(&tokenizer->specRegex[i], spec[i].pattern, REG_EXTENDED))
+        int index = spec[i].type;
+        if (regcomp(&tokenizer->specRegex[index], spec[i].pattern, REG_EXTENDED))
         {
             fprintf(stderr, "Could not compile regex %s", spec[i].pattern);
             exit(EXIT_FAILURE);
@@ -122,7 +123,7 @@ void resetTokenizer(Tokenizer* tokenizer, const char* source)
     tokenizer->line = 1;
 }
 
-Token nextToken(Tokenizer* tokenizer)
+Token nextToken(Tokenizer* tokenizer, TokenType hint)
 {
     skipWhitespace(tokenizer);
     tokenizer->start = tokenizer->current;
@@ -132,10 +133,34 @@ Token nextToken(Tokenizer* tokenizer)
         return makeToken(tokenizer, TOKEN_END_OF_FILE);
     }
 
+    if (hint != -1 && hint < MSH_SPEC_SIZE)
+    {
+        if (hint == TOKEN_NUMBER)
+        {
+            char* end = NULL;
+            strtod(tokenizer->start, &end);
+            if (end != tokenizer->start)
+            {
+                tokenizer->current = end;
+                return makeToken(tokenizer, TOKEN_NUMBER);
+            }
+        }
+        else
+        {
+            regmatch_t match[1];
+            if (regexec(&tokenizer->specRegex[hint], tokenizer->start, 1, match, 0) == 0)
+            {
+                tokenizer->current = tokenizer->start + match[0].rm_eo;
+                return makeToken(tokenizer, hint);
+            }
+        }
+    }
+
     regmatch_t match[1];
     for (int i = 0; i < MSH_SPEC_SIZE; ++i)
     {
-        if (regexec(&tokenizer->specRegex[i], tokenizer->start, 1, match, 0) == 0)
+        int index = spec[i].type;
+        if (regexec(&tokenizer->specRegex[index], tokenizer->start, 1, match, 0) == 0)
         {
             tokenizer->current = tokenizer->start + match[0].rm_eo;
             return makeToken(tokenizer, spec[i].type);

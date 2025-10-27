@@ -75,7 +75,7 @@ static int readFileContent(const char* filename, char** content)
 
 static MSHVersion detectMshVersion(Tokenizer* tokenizer)
 {
-    Token token = nextToken(tokenizer);
+    Token token = nextToken(tokenizer, -1);
     if (token.type == TOKEN_V1_NOD_START
         || token.type == TOKEN_V1_ELM_END
         || token.type == TOKEN_V1_ELM_START
@@ -86,7 +86,7 @@ static MSHVersion detectMshVersion(Tokenizer* tokenizer)
     return MSH_UNKNOWN_VERSION;
 }
 
-static int eatToken(Parser* parser, TokenType expectedType)
+static int eatToken(Parser* parser, TokenType expectedType, TokenType nextTypeHint)
 {
     if (parser->lookAhead.type != expectedType)
     {
@@ -98,16 +98,16 @@ static int eatToken(Parser* parser, TokenType expectedType)
     }
 
     parser->token = parser->lookAhead;
-    parser->lookAhead = nextToken(parser->tokenizer);
+    parser->lookAhead = nextToken(parser->tokenizer, nextTypeHint);
     return 1;
 }
 
 static int parseNodStart(Parser* parser, Mesh* mesh)
 {
-    if (!eatToken(parser, TOKEN_V1_NOD_START)) return 0;
+    if (!eatToken(parser, TOKEN_V1_NOD_START, TOKEN_NUMBER)) return 0;
 
     // Read number of nodes
-    if (!eatToken(parser, TOKEN_NUMBER))
+    if (!eatToken(parser, TOKEN_NUMBER, TOKEN_NUMBER))
     {
         fprintf(stderr, "Expected number of nodes at line %zu but found %.*s\n",
             parser->lookAhead.line,
@@ -136,7 +136,7 @@ static int parseNodStart(Parser* parser, Mesh* mesh)
     for (size_t i = 0; i < nNodes; ++i)
     {
         // Read node index
-        if (!eatToken(parser, TOKEN_NUMBER)) return 0;
+        if (!eatToken(parser, TOKEN_NUMBER, TOKEN_NUMBER)) return 0;
 
         // Subtract 1 to convert to 0-based index
         size_t nodeIndex = (size_t)atoll(parser->token.start) - 1;
@@ -149,15 +149,15 @@ static int parseNodStart(Parser* parser, Mesh* mesh)
         }
 
         // Read x coordinate
-        if (!eatToken(parser, TOKEN_NUMBER)) return 0;
+        if (!eatToken(parser, TOKEN_NUMBER, TOKEN_NUMBER)) return 0;
         double x = atof(parser->token.start);
 
         // Read y coordinate
-        if (!eatToken(parser, TOKEN_NUMBER)) return 0;
+        if (!eatToken(parser, TOKEN_NUMBER, TOKEN_NUMBER)) return 0;
         double y = atof(parser->token.start);
 
         // Read z coordinate
-        if (!eatToken(parser, TOKEN_NUMBER)) return 0;
+        if (!eatToken(parser, TOKEN_NUMBER, TOKEN_NUMBER)) return 0;
         double z = atof(parser->token.start);
 
         // Store node data
@@ -167,7 +167,7 @@ static int parseNodStart(Parser* parser, Mesh* mesh)
         mesh->nodes[nodeIndex].z = z;
     }
 
-    if (!eatToken(parser, TOKEN_V1_NOD_END))
+    if (!eatToken(parser, TOKEN_V1_NOD_END, -1))
     {
         return 0;
     }
@@ -177,10 +177,10 @@ static int parseNodStart(Parser* parser, Mesh* mesh)
 
 static int parseElmStart(Parser* parser, Mesh* mesh)
 {
-    if (!eatToken(parser, TOKEN_V1_ELM_START)) return 0;
+    if (!eatToken(parser, TOKEN_V1_ELM_START, TOKEN_NUMBER)) return 0;
 
     // Read number of elements
-    if (!eatToken(parser, TOKEN_NUMBER))
+    if (!eatToken(parser, TOKEN_NUMBER, TOKEN_NUMBER))
     {
         fprintf(stderr, "Expected number of elements at line %zu but found %.*s\n",
             parser->lookAhead.line,
@@ -209,7 +209,7 @@ static int parseElmStart(Parser* parser, Mesh* mesh)
     for (size_t i = 0; i < nElems; ++i)
     {
         // Read element index
-        if (!eatToken(parser, TOKEN_NUMBER)) return 0;
+        if (!eatToken(parser, TOKEN_NUMBER, TOKEN_NUMBER)) return 0;
 
         // Subtract 1 to convert to 0-based index
         size_t elemIndex = (size_t)atoll(parser->token.start) - 1;
@@ -222,25 +222,25 @@ static int parseElmStart(Parser* parser, Mesh* mesh)
         }
 
         // Read element type
-        if (!eatToken(parser, TOKEN_NUMBER)) return 0;
+        if (!eatToken(parser, TOKEN_NUMBER, TOKEN_NUMBER)) return 0;
         unsigned int type = atoi(parser->token.start);
 
         // Read physical region
-        if (!eatToken(parser, TOKEN_NUMBER)) return 0;
+        if (!eatToken(parser, TOKEN_NUMBER, TOKEN_NUMBER)) return 0;
         unsigned int regPhys = atoi(parser->token.start);
 
         // Read element region
-        if (!eatToken(parser, TOKEN_NUMBER)) return 0;
+        if (!eatToken(parser, TOKEN_NUMBER, TOKEN_NUMBER)) return 0;
         unsigned int regElem = atoi(parser->token.start);
 
         // Read number of nodes
-        if (!eatToken(parser, TOKEN_NUMBER)) return 0;
+        if (!eatToken(parser, TOKEN_NUMBER, TOKEN_NUMBER)) return 0;
         size_t nNodes = (size_t)atoll(parser->token.start);
 
         // Read node indexes
         for (size_t j = 0; j < nNodes; ++j)
         {
-            if (!eatToken(parser, TOKEN_NUMBER)) return 0;
+            if (!eatToken(parser, TOKEN_NUMBER, TOKEN_NUMBER)) return 0;
             // Subtract 1 to convert to 0-based index
             mesh->elements[elemIndex].nodes[j] = (size_t)atoll(parser->token.start) - 1;
         }
@@ -253,7 +253,7 @@ static int parseElmStart(Parser* parser, Mesh* mesh)
         mesh->elements[elemIndex].nNodes = nNodes;
     }
 
-    if (!eatToken(parser, TOKEN_V1_ELM_END))
+    if (!eatToken(parser, TOKEN_V1_ELM_END, -1))
     {
         return 0;
     }
@@ -263,7 +263,7 @@ static int parseElmStart(Parser* parser, Mesh* mesh)
 
 static int parseMshV1(Parser* parser, Mesh* mesh)
 {
-    parser->lookAhead = nextToken(parser->tokenizer);
+    parser->lookAhead = nextToken(parser->tokenizer, -1);
     while (parser->lookAhead.type != TOKEN_END_OF_FILE)
     {
         switch (parser->lookAhead.type)

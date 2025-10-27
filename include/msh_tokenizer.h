@@ -14,9 +14,8 @@
 #include <regex.h>
 #include <stddef.h>
 
-#define MSH_SPEC_SIZE 5
-
-typedef enum {
+typedef enum
+{
     MSH_V1,
     MSH_UNKNOWN_VERSION
 } MSHVersion;
@@ -28,6 +27,8 @@ typedef enum
     TOKEN_V1_ELM_START,         // $ELM
     TOKEN_V1_ELM_END,           // $ENDELM
     TOKEN_NUMBER,
+    // add new token types above this line
+    MSH_SPEC_SIZE,              // number of token types in the spec
     TOKEN_END_OF_FILE,
     TOKEN_ERROR
 } TokenType;
@@ -55,7 +56,7 @@ void freeTokenizer(Tokenizer* tokenizer);
 
 void resetTokenizer(Tokenizer* tokenizer, const char* source);
 
-Token nextToken(Tokenizer* tokenizer);
+Token nextToken(Tokenizer* tokenizer, TokenType hint);
 
 char* tokenTypeToValue(TokenType type);
 
