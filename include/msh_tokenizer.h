@@ -22,6 +22,7 @@ typedef enum
 
 typedef enum
 {
+    TOKEN_NULL = -1,            // valid tokens only start from 0
     TOKEN_V1_NOD_START,         // $NOD
     TOKEN_V1_NOD_END,           // $ENDNOD
     TOKEN_V1_ELM_START,         // $ELM

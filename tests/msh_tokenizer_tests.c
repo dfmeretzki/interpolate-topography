@@ -60,7 +60,7 @@ static int tokenizerTests()
         int i = 0;
         do
         {
-            t = nextToken(&tokenizer, -1);
+            t = nextToken(&tokenizer, TOKEN_NULL);
             if (t.type != r[i])
             {
                 printf("Found token type %s while expecting %s",
@@ -84,7 +84,7 @@ static int tokenizerTests()
         int i = 0;
         do
         {
-            t = nextToken(&tokenizer, -1);
+            t = nextToken(&tokenizer, TOKEN_NULL);
             if (compare(t.start, r[i], t.length) != 1)
             {
                 printf("Extracted token value %.*s while expecting %s",
@@ -107,7 +107,7 @@ static int tokenizerTests()
         int i = 0;
         do
         {
-            t = nextToken(&tokenizer, -1);
+            t = nextToken(&tokenizer, TOKEN_NULL);
             if (t.line != r[i])
             {
                 printf("Found token line %zu while expecting %zu", t.line, r[i]);
@@ -125,7 +125,7 @@ static int tokenizerTests()
         char* file = "$NOD @123";
         initTokenizer(&tokenizer, file);
         Token t = nextToken(&tokenizer, TOKEN_V1_NOD_START);    // $NOD
-        t = nextToken(&tokenizer, -1);                          // @123
+        t = nextToken(&tokenizer, TOKEN_NULL);                          // @123
         if (t.type != TOKEN_ERROR)
         {
             printf("Expected TOKEN_ERROR but found %s", typeToString(t.type));
@@ -158,7 +158,7 @@ static int tokenizerTests()
         Tokenizer tokenizer;
         char* file = "";
         initTokenizer(&tokenizer, file);
-        Token t = nextToken(&tokenizer, -1);
+        Token t = nextToken(&tokenizer, TOKEN_NULL);
         if (t.type != TOKEN_END_OF_FILE)
         {
             printf("Expected TOKEN_END_OF_FILE but found %s", typeToString(t.type));
@@ -172,7 +172,7 @@ static int tokenizerTests()
         Tokenizer tokenizer;
         char* file = "   \n\t  \n  ";
         initTokenizer(&tokenizer, file);
-        Token t = nextToken(&tokenizer, -1);
+        Token t = nextToken(&tokenizer, TOKEN_NULL);
         if (t.type != TOKEN_END_OF_FILE)
         {
             printf("Expected TOKEN_END_OF_FILE but found %s", typeToString(t.type));
@@ -219,7 +219,7 @@ static int tokenizerTests()
                 return 1;
             }
         }
-        Token t = nextToken(&tokenizer, -1);
+        Token t = nextToken(&tokenizer, TOKEN_NULL);
         if (t.type != TOKEN_END_OF_FILE)
         {
             printf("Expected TOKEN_END_OF_FILE but found %s", typeToString(t.type));

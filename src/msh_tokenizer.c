@@ -133,7 +133,7 @@ Token nextToken(Tokenizer* tokenizer, TokenType hint)
         return makeToken(tokenizer, TOKEN_END_OF_FILE);
     }
 
-    if (hint != -1 && hint < MSH_SPEC_SIZE)
+    if (hint > TOKEN_NULL && hint < MSH_SPEC_SIZE)
     {
         if (hint == TOKEN_NUMBER)
         {

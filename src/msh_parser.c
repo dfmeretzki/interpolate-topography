@@ -75,7 +75,7 @@ static int readFileContent(const char* filename, char** content)
 
 static MSHVersion detectMshVersion(Tokenizer* tokenizer)
 {
-    Token token = nextToken(tokenizer, -1);
+    Token token = nextToken(tokenizer, TOKEN_NULL);
     if (token.type == TOKEN_V1_NOD_START
         || token.type == TOKEN_V1_ELM_END
         || token.type == TOKEN_V1_ELM_START
@@ -167,7 +167,7 @@ static int parseNodStart(Parser* parser, Mesh* mesh)
         mesh->nodes[nodeIndex].z = z;
     }
 
-    if (!eatToken(parser, TOKEN_V1_NOD_END, -1))
+    if (!eatToken(parser, TOKEN_V1_NOD_END, TOKEN_NULL))
     {
         return 0;
     }
@@ -253,7 +253,7 @@ static int parseElmStart(Parser* parser, Mesh* mesh)
         mesh->elements[elemIndex].nNodes = nNodes;
     }
 
-    if (!eatToken(parser, TOKEN_V1_ELM_END, -1))
+    if (!eatToken(parser, TOKEN_V1_ELM_END, TOKEN_NULL))
     {
         return 0;
     }
@@ -263,7 +263,7 @@ static int parseElmStart(Parser* parser, Mesh* mesh)
 
 static int parseMshV1(Parser* parser, Mesh* mesh)
 {
-    parser->lookAhead = nextToken(parser->tokenizer, -1);
+    parser->lookAhead = nextToken(parser->tokenizer, TOKEN_NULL);
     while (parser->lookAhead.type != TOKEN_END_OF_FILE)
     {
         switch (parser->lookAhead.type)
