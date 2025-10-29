@@ -40,7 +40,7 @@ static int markFaceNodes(const ConfigFile* config, Mesh* mesh)
 
             for (int i = 0; i < MAXSURF; ++i)
             {
-                int faceNum = config->surfaceMeshFaces[i];
+                unsigned int faceNum = config->surfaceMeshFaces[i];
                 if (faceNum == 0) break;
                 if (faceNum == mesh->elements[index].regElem)
                 {

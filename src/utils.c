@@ -19,5 +19,5 @@ void removeSpaces(char* s)
     {
         while (isspace(*x)) ++x;
     }
-    while (*s++ = *x++);
+    while ((*s++ = *x++));
 }

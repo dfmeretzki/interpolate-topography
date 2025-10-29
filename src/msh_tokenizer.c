@@ -188,5 +188,7 @@ char* tokenTypeToValue(TokenType type)
         return "end of file";
     case TOKEN_ERROR:
         return "error";
+    default:
+        return "";
     }
 }

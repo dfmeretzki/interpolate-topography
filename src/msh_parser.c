@@ -58,7 +58,7 @@ static int readFileContent(const char* filename, char** content)
     }
 
     size_t bytesRead = fread(buffer, 1, fileSize, file);
-    if (bytesRead != fileSize)
+    if (bytesRead != (unsigned long)fileSize)
     {
         fprintf(stderr, "Could not read file content of '%s'\n", filename);
         free(buffer);
@@ -140,7 +140,7 @@ static int parseNodStart(Parser* parser, Mesh* mesh)
 
         // Subtract 1 to convert to 0-based index
         size_t nodeIndex = (size_t)atoll(parser->token.start) - 1;
-        if (nodeIndex < 0 || nodeIndex >= nNodes)
+        if (nodeIndex >= nNodes)
         {
             fprintf(stderr, "Node index %zu out of bounds at line %zu\n",
                 nodeIndex + 1,
@@ -213,7 +213,7 @@ static int parseElmStart(Parser* parser, Mesh* mesh)
 
         // Subtract 1 to convert to 0-based index
         size_t elemIndex = (size_t)atoll(parser->token.start) - 1;
-        if (elemIndex < 0 || elemIndex >= nElems)
+        if (elemIndex >= nElems)
         {
             fprintf(stderr, "Element index %zu out of bounds at line %zu\n",
                 elemIndex + 1,
