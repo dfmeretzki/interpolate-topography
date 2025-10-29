@@ -43,6 +43,15 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
 
+    // Smooth the mesh faces
+    if (!smoothMesh(&config, &mesh))
+    {
+        fprintf(stderr, "Failed to smooth the mesh faces\n");
+        freeTopography(&topo);
+        freeMesh(&mesh);
+        exit(EXIT_FAILURE);
+    }
+
     freeTopography(&topo);
     freeMesh(&mesh);
 

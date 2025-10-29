@@ -41,7 +41,7 @@ typedef struct
     size_t nElems;              // number of elements
     size_t* elemIndex;          // index of each element in the mesh
     Element* elements;          // array of elements in the mesh
-    unsigned char* mark;        // work array for marking elements
+    unsigned char* mark;        // work array for marking nodes
     size_t triQuadCount;        // number of tri and quad elements
     unsigned int maxElemNodes;  // maximum number of nodes per element
 } Mesh;
@@ -60,5 +60,7 @@ void freeMesh(Mesh* mesh);
 void freeTopography(Topography* topo);
 
 int interpolateTopography(const ConfigFile* config, const Topography* topo, Mesh* mesh);
+
+int smoothMesh(const ConfigFile* config, Mesh* mesh);
 
 #endif // MESH_H

@@ -63,6 +63,9 @@ static int meshTests()
             {
                 printf("Node %zu z-coordinate mismatch: expected %lf but found %lf\n",
                     i + 1, resultMesh.nodes[i].z, mesh.nodes[i].z);
+                freeMesh(&mesh);
+                freeMesh(&resultMesh);
+                freeTopography(&topo);
                 return 1;
             }
         }
@@ -71,6 +74,73 @@ static int meshTests()
         freeMesh(&resultMesh);
         freeTopography(&topo);
     }
+    {
+        // Test smooth mesh
+        Mesh mesh = { 0 };
+        Mesh resultMesh = { 0 };
+        // Working directory is interpol_topo/out/build/debug/tests when running tests
+        char* meshFile = "../../../../tests/test_skin_topo.msh";
+        char* resultMeshFile = "../../../../tests/test_skin_topo_smooth.msh";
+        if (!readMshFile(meshFile, &mesh))
+        {
+            printf("Failed to read MSH file %s\n", meshFile);
+            return 1;
+        }
+        if (!readMshFile(resultMeshFile, &resultMesh))
+        {
+            printf("Failed to read MSH file %s\n", resultMeshFile);
+            freeMesh(&mesh);
+            return 1;
+        }
+
+        ConfigFile config = { 0 };
+        config.meshFacesToSmooth[0] = 1;
+        config.meshFacesToSmooth[1] = 2;
+        config.meshFacesToSmooth[2] = 3;
+        config.meshFacesToSmooth[3] = 4;
+        config.meshFacesToSmooth[4] = 5;
+        if (!smoothMesh(&config, &mesh))
+        {
+            printf("Failed to smooth the mesh\n");
+            freeMesh(&mesh);
+            freeMesh(&resultMesh);
+            return 1;
+        }
+
+        for (size_t i = 0; i < mesh.nNodes; ++i)
+        {
+            // Compare coordinates with a tolerance since msh files
+            // may have slight differences due to floating point representation
+            if (fabs(mesh.nodes[i].x - resultMesh.nodes[i].x) > 1)
+            {
+                printf("Node %zu x-coordinate mismatch: expected %lf but found %lf\n",
+                    i + 1, resultMesh.nodes[i].x, mesh.nodes[i].x);
+                freeMesh(&mesh);
+                freeMesh(&resultMesh);
+                return 1;
+            }
+            if (fabs(mesh.nodes[i].y - resultMesh.nodes[i].y) > 1)
+            {
+                printf("Node %zu y-coordinate mismatch: expected %lf but found %lf\n",
+                    i + 1, resultMesh.nodes[i].y, mesh.nodes[i].y);
+                freeMesh(&mesh);
+                freeMesh(&resultMesh);
+                return 1;
+            }
+            if (fabs(mesh.nodes[i].z - resultMesh.nodes[i].z) > 1)
+            {
+                printf("Node %zu z-coordinate mismatch: expected %lf but found %lf\n",
+                    i + 1, resultMesh.nodes[i].z, mesh.nodes[i].z);
+                freeMesh(&mesh);
+                freeMesh(&resultMesh);
+                return 1;
+            }
+        }
+
+        freeMesh(&mesh);
+        freeMesh(&resultMesh);
+    }
+
     return 0;
 }
 
