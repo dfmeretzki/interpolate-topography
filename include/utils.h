@@ -13,4 +13,6 @@
 
 void removeSpaces(char* s);
 
+void combinePaths(char* dest, const char* path1, const char* path2);
+
 #endif

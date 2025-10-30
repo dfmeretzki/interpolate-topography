@@ -13,18 +13,22 @@
 #include "mesh.h"
 #include "msh_parser.h"
 #include "topography_parser.h"
+#include "utils.h"
 
-static int meshTests()
+static int meshTests(char* projectRootDir)
 {
     {
         // Test interpolate topography
         Mesh mesh = { 0 };
         Mesh resultMesh = { 0 };
         Topography topo = { 0 };
-        // Working directory is interpol_topo/out/build/debug/tests when running tests
-        char* meshFile = "../../../../tests/test_skin.msh";
-        char* resultMeshFile = "../../../../tests/test_skin_topo.msh";
-        char* topoFile = "../../../../tests/test_skin_topography";
+        char meshFile[256];
+        combinePaths(meshFile, projectRootDir, "tests/test_skin.msh");
+        char resultMeshFile[256];
+        combinePaths(resultMeshFile, projectRootDir, "tests/test_skin_topo.msh");
+        char topoFile[256];
+        combinePaths(topoFile, projectRootDir, "tests/test_skin_topography");
+
         if (!readMshFile(meshFile, &mesh))
         {
             printf("Failed to read MSH file %s\n", meshFile);
@@ -78,9 +82,10 @@ static int meshTests()
         // Test smooth mesh
         Mesh mesh = { 0 };
         Mesh resultMesh = { 0 };
-        // Working directory is interpol_topo/out/build/debug/tests when running tests
-        char* meshFile = "../../../../tests/test_skin_topo.msh";
-        char* resultMeshFile = "../../../../tests/test_skin_topo_smooth.msh";
+        char meshFile[256];
+        combinePaths(meshFile, projectRootDir, "tests/test_skin_topo.msh");
+        char resultMeshFile[256];
+        combinePaths(resultMeshFile, projectRootDir, "tests/test_skin_topo_smooth.msh");
         if (!readMshFile(meshFile, &mesh))
         {
             printf("Failed to read MSH file %s\n", meshFile);
@@ -144,7 +149,12 @@ static int meshTests()
     return 0;
 }
 
-int main()
+int main(int argc, char** argv)
 {
-    return meshTests();
+    if (argc < 2)
+    {
+        printf("Usage: %s <project_root_directory>\n", argv[0]);
+        return 1;
+    }
+    return meshTests(argv[1]);
 }

@@ -10,14 +10,15 @@
 #include <stdio.h>
 
 #include "topography_parser.h"
+#include "utils.h"
 
-static int topographyParserTests()
+static int topographyParserTests(char* projectRootDir)
 {
     {
         // Test reading a simple topography file
-        Topography topo;
-        // Working directory is interpol_topo/out/build/debug/tests when running tests
-        char* filename = "../../../../tests/test_topography";
+        Topography topo = { 0 };
+        char filename[256];
+        combinePaths(filename, projectRootDir, "tests/test_topography");
         size_t expectedNx = 3;
         size_t expectedNy = 2;
         double expectedX[3] = { 7.1860000E+05, 7.1875302E+05, 7.1890604E+05 };
@@ -76,7 +77,12 @@ static int topographyParserTests()
     return 0;
 }
 
-int main()
+int main(int argc, char** argv)
 {
-    return topographyParserTests();
+    if (argc < 2)
+    {
+        printf("Usage: %s <project_root_directory>\n", argv[0]);
+        return 1;
+    }
+    return topographyParserTests(argv[1]);
 }

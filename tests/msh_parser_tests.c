@@ -11,15 +11,16 @@
 #include <stdio.h>
 
 #include "msh_parser.h"
+#include "utils.h"
 
-static int parserTests()
+static int parserTests(char* projectRootDir)
 {
 
     {
         // Test reading a simple MSH v1 file
         Mesh mesh = { 0 };
-        // Working directory is interpol_topo/out/build/debug/tests when running tests
-        char* filename = "../../../../tests/test.msh";
+        char filename[256];
+        combinePaths(filename, projectRootDir, "tests/test.msh");
         double expectedNodes[3][3] = {
             {718600.0, 1152600.0, -6000.0},
             {741400.0, 1152600.0, -6000.0},
@@ -120,9 +121,10 @@ static int parserTests()
         // Test writing a MSH v1 file
         Mesh mesh = { 0 };
         Mesh resultMesh = { 0 };
-        // Working directory is interpol_topo/out/build/debug/tests when running tests
-        char* writeFile = "../../../../tests/test_skin_modified.msh";
-        char* resultMeshFile = "../../../../tests/test_skin.msh";
+        char writeFile[256];
+        combinePaths(writeFile, projectRootDir, "tests/test_skin_modified.msh");
+        char resultMeshFile[256];
+        combinePaths(resultMeshFile, projectRootDir, "tests/test_skin.msh");
         if (!readMshFile(resultMeshFile, &resultMesh))
         {
             printf("Failed to read MSH file %s\n", resultMeshFile);
@@ -239,7 +241,12 @@ static int parserTests()
     return 0;
 }
 
-int main()
+int main(int argc, char** argv)
 {
-    return parserTests();
+    if (argc < 2)
+    {
+        printf("Usage: %s <project_root_directory>\n", argv[0]);
+        return 1;
+    }
+    return parserTests(argv[1]);
 }
