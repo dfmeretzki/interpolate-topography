@@ -52,6 +52,16 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
 
+    // Write the mesh to a .msh file
+    if (!writeMshFile(config.skinMeshFileOut, &mesh, MSH_V1))
+    {
+        fprintf(stderr, "Failed to write the resulting .msh file '%s'\n",
+            config.skinMeshFileOut);
+        freeTopography(&topo);
+        freeMesh(&mesh);
+        exit(EXIT_FAILURE);
+    }
+
     freeTopography(&topo);
     freeMesh(&mesh);
 

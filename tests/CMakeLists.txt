@@ -17,6 +17,7 @@ target_include_directories(msh_parser_tests
 target_link_libraries(msh_parser_tests PUBLIC
 	compiler_flags
 	interpol_topography_lib
+	"$<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:Clang>>:m>"
 )
 add_test(msh_parser_tests msh_parser_tests)
 

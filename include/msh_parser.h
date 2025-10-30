@@ -12,7 +12,10 @@
 #define MSH_PARSER_H
 
 #include "mesh.h"
+#include "msh_tokenizer.h"
 
 int readMshFile(const char* filename, Mesh* mesh);
+
+int writeMshFile(const char* filename, const Mesh* mesh, MSHVersion version);
 
 #endif // MSH_PARSER_H

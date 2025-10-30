@@ -9,6 +9,7 @@
 */
 
 #include <errno.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -71,6 +72,20 @@ static int readFileContent(const char* filename, char** content)
 
     fclose(file);
     return 1;
+}
+
+static void writeDouble(const FILE* file, double value)
+{
+    double intPart;
+    double fracPart = modf(value, &intPart);
+    if (fracPart == 0.0)
+    {
+        fprintf((FILE*)file, "%.0f", value);
+    }
+    else
+    {
+        fprintf((FILE*)file, "%lf", value);
+    }
 }
 
 static MSHVersion detectMshVersion(Tokenizer* tokenizer)
@@ -287,6 +302,45 @@ static int parseMshV1(Parser* parser, Mesh* mesh)
     return 1;
 }
 
+static int writeMshV1(FILE* file, const Mesh* mesh)
+{
+    fprintf(file, "%s\n", tokenTypeToValue(TOKEN_V1_NOD_START));
+    fprintf(file, "%zu\n", mesh->nNodes);
+    for (size_t i = 0; i < mesh->nNodes; ++i)
+    {
+        size_t nodeIndex = mesh->nodeIndex[i];
+        Node* node = &mesh->nodes[nodeIndex];
+        fprintf(file, "%zu ", nodeIndex + 1);
+        writeDouble(file, node->x);
+        fprintf(file, " ");
+        writeDouble(file, node->y);
+        fprintf(file, " ");
+        writeDouble(file, node->z);
+        fprintf(file, "\n");
+    }
+    fprintf(file, "%s\n", tokenTypeToValue(TOKEN_V1_NOD_END));
+
+    fprintf(file, "%s\n", tokenTypeToValue(TOKEN_V1_ELM_START));
+    fprintf(file, "%zu\n", mesh->nElems);
+    for (size_t i = 0; i < mesh->nElems; ++i)
+    {
+        size_t elemIndex = mesh->elemIndex[i];
+        Element* elem = &mesh->elements[elemIndex];
+        fprintf(file, "%zu %u %u %u %zu", elemIndex + 1, elem->type,
+            elem->regPhys, elem->regElem, elem->nNodes);
+        for (size_t j = 0; j < elem->nNodes; ++j)
+        {
+            fprintf(file, " %zu", elem->nodes[j] + 1);
+        }
+        fprintf(file, "\n");
+    }
+    fprintf(file, "%s\n", tokenTypeToValue(TOKEN_V1_ELM_END));
+
+    fclose(file);
+    return 1;
+}
+
+
 int readMshFile(const char* filename, Mesh* mesh)
 {
     char* buffer = NULL;
@@ -316,5 +370,30 @@ int readMshFile(const char* filename, Mesh* mesh)
     if (!result) freeMesh(mesh);
     free(buffer);
     freeTokenizer(&tokenizer);
+    return result;
+}
+
+int writeMshFile(const char* filename, const Mesh* mesh, MSHVersion version)
+{
+    FILE* file = fopen(filename, "w");
+    if (file == NULL)
+    {
+        fprintf(stderr, "Could not create or open .msh file '%s': %s\n",
+            filename, strerror(errno));
+        return 0;
+    }
+
+    int result = 0;
+    switch (version)
+    {
+    case MSH_V1:
+        result = writeMshV1(file, mesh);
+        break;
+    case MSH_UNKNOWN_VERSION:
+    default:
+        fprintf(stderr, "Unsupported or unknown MSH version for writing file '%s'\n",
+            filename);
+    }
+
     return result;
 }
