@@ -8,6 +8,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "topography_parser.h"
 #include "utils.h"
@@ -38,6 +39,7 @@ static int topographyParserTests(char* projectRootDir)
         {
             printf("Expected topo dimensions (%zu, %zu) but found (%zu, %zu)\n",
                 expectedNx, expectedNy, topo.nx, topo.ny);
+            freeTopography(&topo);
             return 1;
         }
         for (size_t i = 0; i < topo.nx; ++i)
@@ -46,6 +48,7 @@ static int topographyParserTests(char* projectRootDir)
             {
                 printf("X grid value %zu mismatch: expected %f but found %f\n",
                     i, expectedX[i], topo.xGrid[i]);
+                freeTopography(&topo);
                 return 1;
             }
         }
@@ -55,6 +58,7 @@ static int topographyParserTests(char* projectRootDir)
             {
                 printf("Y grid value %zu mismatch: expected %f but found %f\n",
                     i, expectedY[i], topo.yGrid[i]);
+                freeTopography(&topo);
                 return 1;
             }
         }
@@ -67,11 +71,62 @@ static int topographyParserTests(char* projectRootDir)
                 {
                     printf("Topo value %zu mismatch: expected %f but found %f\n",
                         index, expectedValues[index], topo.values[index]);
+                    freeTopography(&topo);
                     return 1;
                 }
             }
         }
+
         freeTopography(&topo);
+    }
+    {
+        // Test reading a raw topography file
+        Node* nodes = NULL;
+        size_t nNodes = 0;
+        char filename[256];
+        combinePaths(filename, projectRootDir, "tests/test_raw_topography");
+        size_t expectedNNodes = 11;
+        Node expectedNodes[] = {
+            { 718600, 1.1755e+06, 400.007 },
+            { 718800, 1.1748e+06, 399.646 },
+            { 719000, 1.1698e+06, 419.834 },
+            { 719200, 1.1698e+06, 440.044 },
+            { 719400, 1.1696e+06, 379.719 },
+            { 719600, 1.1696e+06, 379.473 },
+            { 719800, 1.1692e+06, 379.816 },
+            { 720000, 1.1692e+06, 359.234 },
+            { 720200, 1.1695e+06, 439.547 },
+            { 720400, 1.1695e+06, 480.115 },
+            { 720600, 1.1732e+06, 479.897 },
+        };
+
+        if (!readRawTopographyFile(filename, &nodes, &nNodes))
+        {
+            printf("Failed to read raw topography file %s\n", filename);
+            return 1;
+        }
+        if (nNodes != expectedNNodes)
+        {
+            printf("Expected %zu nodes but found %zu\n", expectedNNodes, nNodes);
+            free(nodes);
+            return 1;
+        }
+        for (size_t i = 0; i < nNodes; ++i)
+        {
+            if (nodes[i].x != expectedNodes[i].x ||
+                nodes[i].y != expectedNodes[i].y ||
+                nodes[i].z != expectedNodes[i].z)
+            {
+                printf("Node %zu mismatch: expected (%f, %f, %f) but found (%f, %f, %f)\n",
+                    i,
+                    expectedNodes[i].x, expectedNodes[i].y, expectedNodes[i].z,
+                    nodes[i].x, nodes[i].y, nodes[i].z);
+                free(nodes);
+                return 1;
+            }
+        }
+
+        free(nodes);
     }
 
     return 0;

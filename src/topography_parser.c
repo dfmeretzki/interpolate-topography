@@ -99,3 +99,54 @@ int readTopographyFile(const char* filename, Topography* topo)
     fclose(file);
     return 1;
 }
+
+int readRawTopographyFile(const char* filename, Node** nodes, size_t* nNodes)
+{
+    FILE* file = fopen(filename, "r");
+    if (file == NULL)
+    {
+        fprintf(stderr, "Could not open topography file: %s\n", filename);
+        return 0;
+    }
+
+    size_t capacity = 256;
+    *nodes = (Node*)malloc(capacity * sizeof(Node));
+    if (*nodes == NULL)
+    {
+        fprintf(stderr, "Could not allocate memory for %zu nodes\n", capacity);
+        fclose(file);
+        return 0;
+    }
+
+    size_t count = 0;
+    while (fscanf(file, "%lf %lf %lf",
+        &(*nodes)[count].x,
+        &(*nodes)[count].y,
+        &(*nodes)[count].z) == 3)
+    {
+        ++count;
+        if (count >= capacity)
+        {
+            capacity *= 2;
+            Node* temp = (Node*)realloc(*nodes, capacity * sizeof(Node));
+            if (temp == NULL)
+            {
+                fprintf(stderr, "Could not reallocate memory for %zu nodes\n", capacity);
+                free(*nodes);
+                fclose(file);
+                return 0;
+            }
+            *nodes = temp;
+        }
+    }
+
+    fclose(file);
+    *nNodes = count;
+    if (count == 0)
+    {
+        free(*nodes);
+        *nodes = NULL;
+    }
+
+    return 1;
+}
