@@ -13,6 +13,8 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
 
+    int result = EXIT_SUCCESS;
+
     // Read the configuration file
     ConfigFile config = { 0 };
     readConfigFile(argv[1], &config);
@@ -30,26 +32,24 @@ int main(int argc, char** argv)
     if (!readTopographyFile(config.topoFile, &topo))
     {
         fprintf(stderr, "Failed to parse topography file '%s'\n", config.topoFile);
-        freeMesh(&mesh);
-        exit(EXIT_FAILURE);
+        result = EXIT_FAILURE;
+        goto out_free_mesh;
     }
 
     // Interpolate the topography onto the mesh
     if (!interpolateTopography(&config, &topo, &mesh))
     {
         fprintf(stderr, "Failed to interpolate topography onto the mesh\n");
-        freeTopography(&topo);
-        freeMesh(&mesh);
-        exit(EXIT_FAILURE);
+        result = EXIT_FAILURE;
+        goto out_free_topo;
     }
 
     // Smooth the mesh faces
     if (!smoothMesh(&config, &mesh))
     {
         fprintf(stderr, "Failed to smooth the mesh faces\n");
-        freeTopography(&topo);
-        freeMesh(&mesh);
-        exit(EXIT_FAILURE);
+        result = EXIT_FAILURE;
+        goto out_free_topo;
     }
 
     // Write the mesh to a .msh file
@@ -57,13 +57,13 @@ int main(int argc, char** argv)
     {
         fprintf(stderr, "Failed to write the resulting .msh file '%s'\n",
             config.skinMeshFileOut);
-        freeTopography(&topo);
-        freeMesh(&mesh);
-        exit(EXIT_FAILURE);
+        result = EXIT_FAILURE;
+        goto out_free_topo;
     }
 
+out_free_topo:
     freeTopography(&topo);
+out_free_mesh:
     freeMesh(&mesh);
-
-    return EXIT_SUCCESS;
+    return result;
 }

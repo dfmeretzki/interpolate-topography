@@ -14,6 +14,7 @@
 
 int readTopographyFile(const char* filename, Topography* topo)
 {
+    int result = 1;
     FILE* file = fopen(filename, "r");
     if (file == NULL)
     {
@@ -25,32 +26,30 @@ int readTopographyFile(const char* filename, Topography* topo)
     if (fscanf(file, "%zu %zu", &topo->nx, &topo->ny) != 2)
     {
         fprintf(stderr, "Error reading dimensions from topography file: %s\n", filename);
-        fclose(file);
-        return 0;
+        result = 0;
+        goto out_close_file;
     }
 
     topo->xGrid = (double*)malloc(topo->nx * sizeof(double));
     if (topo->xGrid == NULL)
     {
         fprintf(stderr, "Could not allocate memory for x grid\n");
-        fclose(file);
-        return 0;
+        result = 0;
+        goto out_close_file;
     }
     topo->yGrid = (double*)malloc(topo->ny * sizeof(double));
     if (topo->yGrid == NULL)
     {
         fprintf(stderr, "Could not allocate memory for y grid\n");
-        freeTopography(topo);
-        fclose(file);
-        return 0;
+        result = 0;
+        goto out_free_topo;
     }
     topo->values = (double*)malloc(topo->nx * topo->ny * sizeof(double));
     if (topo->values == NULL)
     {
         fprintf(stderr, "Could not allocate memory for topography values\n");
-        freeTopography(topo);
-        fclose(file);
-        return 0;
+        result = 0;
+        goto out_free_topo;
     }
 
     // Read x grid values
@@ -60,9 +59,8 @@ int readTopographyFile(const char* filename, Topography* topo)
         {
             fprintf(stderr, "Error reading x grid data from topography file: %s at index %zu\n",
                 filename, i);
-            freeTopography(topo);
-            fclose(file);
-            return 0;
+            result = 0;
+            goto out_free_topo;
         }
     }
 
@@ -73,9 +71,8 @@ int readTopographyFile(const char* filename, Topography* topo)
         {
             fprintf(stderr, "Error reading y grid data from topography file: %s at index %zu\n",
                 filename, i);
-            freeTopography(topo);
-            fclose(file);
-            return 0;
+            result = 0;
+            goto out_free_topo;
         }
     }
 
@@ -89,15 +86,19 @@ int readTopographyFile(const char* filename, Topography* topo)
                 fprintf(stderr, "Error reading topography values from topography file: "
                     "%s at index %zu\n",
                     filename, i * topo->nx + j);
-                freeTopography(topo);
-                fclose(file);
-                return 0;
+                result = 0;
+                goto out_free_topo;
             }
         }
     }
 
+    goto out_close_file;
+
+out_free_topo:
+    freeTopography(topo);
+out_close_file:
     fclose(file);
-    return 1;
+    return result;
 }
 
 int readRawTopographyFile(const char* filename, Node** nodes, size_t* nNodes)

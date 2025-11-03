@@ -27,6 +27,7 @@ typedef struct
 
 static int readFileContent(const char* filename, char** content)
 {
+    int result = 1;
     FILE* file = fopen(filename, "rb");
     if (file == NULL)
     {
@@ -37,16 +38,16 @@ static int readFileContent(const char* filename, char** content)
     if (fseek(file, 0, SEEK_END) != 0)
     {
         fprintf(stderr, "Could not seek to end of file '%s': %s\n", filename, strerror(errno));
-        fclose(file);
-        return 0;
+        result = 0;
+        goto out_close_file;
     }
 
     long fileSize = ftell(file);
     if (fileSize == -1)
     {
         fprintf(stderr, "Could not get file size for '%s': %s\n", filename, strerror(errno));
-        fclose(file);
-        return 0;
+        result = 0;
+        goto out_close_file;
     }
 
     rewind(file);
@@ -54,8 +55,8 @@ static int readFileContent(const char* filename, char** content)
     if (buffer == NULL)
     {
         fprintf(stderr, "Could not allocate memory for file content of '%s'\n", filename);
-        fclose(file);
-        return 0;
+        result = 0;
+        goto out_close_file;
     }
 
     size_t bytesRead = fread(buffer, 1, fileSize, file);
@@ -63,15 +64,16 @@ static int readFileContent(const char* filename, char** content)
     {
         fprintf(stderr, "Could not read file content of '%s'\n", filename);
         free(buffer);
-        fclose(file);
-        return 0;
+        result = 0;
+        goto out_close_file;
     }
 
     buffer[bytesRead] = '\0';
     *content = buffer;
 
+out_close_file:
     fclose(file);
-    return 1;
+    return result;
 }
 
 static void writeDouble(const FILE* file, double value)
