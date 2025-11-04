@@ -29,9 +29,9 @@ int main(int argc, char** argv)
 
     // Parse the topography file
     Topography topo = { 0 };
-    if (!readTopographyFile(config.topoFile, &topo))
+    if (!readTopographyFile(config.topoFiles[0], &topo))
     {
-        fprintf(stderr, "Failed to parse topography file '%s'\n", config.topoFile);
+        fprintf(stderr, "Failed to parse topography file '%s'\n", config.topoFiles[0]);
         result = EXIT_FAILURE;
         goto out_free_mesh;
     }

@@ -11,7 +11,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define MAX_PATH_LENGTH 80  // max. number of characters that a file path can contain
+#define MAX_PATH_LENGTH 128 // max. number of characters that a file path can contain
 #define MAXSURF 100         // max. number of faces on the surface
 #define MAXSMOOTH 100       // max. number of faces for which a mesh smoothing is required
 #define MAXCN 100           // max. number of node-node connections

@@ -15,15 +15,17 @@
 
 typedef struct
 {
-    char skinMeshFileIn[MAX_PATH_LENGTH];   // the input mesh file name
-    char skinMeshFileOut[MAX_PATH_LENGTH];  // the output mesh file name
-    char topoFile[MAX_PATH_LENGTH];         // the topography file (grid) name
-    int surfaceMeshFaces[MAXSURF];          // the face #(s) corresponding to the surface
-    int meshFacesToSmooth[MAXSMOOTH];       // the face #(s) where barycentric smoothing will be applied if desired
+    char skinMeshFileIn[MAX_PATH_LENGTH];       // the input mesh file name
+    char skinMeshFileOut[MAX_PATH_LENGTH];      // the output mesh file name
+    char topoFiles[MAXSURF][MAX_PATH_LENGTH];   // the topography files (grid) names
+    size_t nx;                                  // number of x-values to use on the grid
+    size_t ny;                                  // number of y-values to use on the grid
+    int surfaceMeshFaces[MAXSURF];              // the face #(s) corresponding to the surface
+    int meshFacesToSmooth[MAXSMOOTH];           // the face #(s) where barycentric smoothing will be applied if desired
 
     // Used in the smoothing algorithm
-    int iterMaxSmooth;                      // default value = 0
-    double tolerSmooth;                     // default value = 0.0
+    int iterMaxSmooth;                          // default value = 200
+    double tolerSmooth;                         // default value = 0.01
 } ConfigFile;
 
 void readConfigFile(const char* filename, ConfigFile* config);

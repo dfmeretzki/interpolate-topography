@@ -20,8 +20,6 @@ static int parseLine(const char* restrict line, char* restrict key, char* restri
 {
     if (sscanf(line, "%[^=] = %[^\n]", key, value) == 2)
     {
-        removeSpaces(key);
-        removeSpaces(value);
         return 1;
     }
     else
@@ -43,6 +41,23 @@ static void parseArray(char* value, int* arr, int size)
     }
 }
 
+static void parseStringArray(char* value, char arr[MAXSURF][MAX_PATH_LENGTH])
+{
+    char* token = strtok(value, ",");
+    int i = 0;
+    while (token != NULL && i < MAXSURF)
+    {
+        if (strlen(token) >= MAX_PATH_LENGTH)
+        {
+            printf("Error: '%s' file name too long, max length is %d\n", token, MAX_PATH_LENGTH - 1);
+            exit(EXIT_FAILURE);
+        }
+        strcpy(arr[i], token);
+        ++i;
+        token = strtok(NULL, ",");
+    }
+}
+
 static void storeValue(const char* restrict key, char* restrict value, ConfigFile* config)
 {
     if (strcmp("skinMeshFileIn", key) == 0)
@@ -53,9 +68,17 @@ static void storeValue(const char* restrict key, char* restrict value, ConfigFil
     {
         strcpy(config->skinMeshFileOut, value);
     }
-    else if (strcmp("topoFile", key) == 0)
+    else if (strcmp("topoFiles", key) == 0)
     {
-        strcpy(config->topoFile, value);
+        parseStringArray(value, config->topoFiles);
+    }
+    else if (strcmp("nx", key) == 0)
+    {
+        config->nx = (size_t)atoll(value);
+    }
+    else if (strcmp("ny", key) == 0)
+    {
+        config->ny = (size_t)atoll(value);
     }
     else if (strcmp("surfaceMeshFaces", key) == 0)
     {
@@ -79,11 +102,76 @@ static void storeValue(const char* restrict key, char* restrict value, ConfigFil
     }
 }
 
+void validateConfigFile(const ConfigFile* config)
+{
+    if (config->skinMeshFileIn[0] == '\0')
+    {
+        fprintf(stderr, "Error: skinMeshFileIn not defined in config file\n");
+        exit(EXIT_FAILURE);
+    }
+    if (config->skinMeshFileOut[0] == '\0')
+    {
+        fprintf(stderr, "Error: skinMeshFileOut not defined in config file\n");
+        exit(EXIT_FAILURE);
+    }
+
+    int topoFileCount = 0;
+    for (int i = 0; i < MAXSURF; ++i)
+    {
+        if (config->topoFiles[i][0] == '\0') break;
+        ++topoFileCount;
+    }
+    int surfaceFaceCount = 0;
+    for (int i = 0; i < MAXSURF; ++i)
+    {
+        if (config->surfaceMeshFaces[i] == 0) break;
+        ++surfaceFaceCount;
+    }
+
+    if (topoFileCount == 0)
+    {
+        fprintf(stderr, "Error: topoFiles not defined in config file\n");
+        exit(EXIT_FAILURE);
+    }
+    if (topoFileCount > 1 && topoFileCount != surfaceFaceCount)
+    {
+        fprintf(stderr, "Error: number of topoFiles (%d) does not match number of surfaceMeshFaces (%d)\n"
+            "If more than one topography file is provided, there must be a corresponding surface face for each file.\n",
+            topoFileCount, surfaceFaceCount);
+        exit(EXIT_FAILURE);
+    }
+    if (surfaceFaceCount == 0)
+    {
+        fprintf(stderr, "Error: surfaceMeshFaces not defined in config file\n");
+        exit(EXIT_FAILURE);
+    }
+    if (config->nx == 0)
+    {
+        fprintf(stderr, "Error: nx not defined in config file\n");
+        exit(EXIT_FAILURE);
+    }
+    if (config->ny == 0)
+    {
+        fprintf(stderr, "Error: ny not defined in config file\n");
+        exit(EXIT_FAILURE);
+    }
+    if (config->iterMaxSmooth <= 0)
+    {
+        fprintf(stderr, "Error: iterMaxSmooth must be greater than 0\n");
+        exit(EXIT_FAILURE);
+    }
+    if (config->tolerSmooth <= 0.0)
+    {
+        fprintf(stderr, "Error: tolerSmooth must be greater than 0.0\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
 void readConfigFile(const char* filename, ConfigFile* config)
 {
     // set default values in case they are not defined
-    config->iterMaxSmooth = 0;
-    config->tolerSmooth = 0.0;
+    config->iterMaxSmooth = 200;
+    config->tolerSmooth = 0.01;
 
     FILE* file = fopen(filename, "r");
     if (file == NULL)
@@ -97,11 +185,15 @@ void readConfigFile(const char* filename, ConfigFile* config)
     char value[256];
     while (fgets(line, sizeof(line), file))
     {
-        if (line[0] == '#' || line[0] == '\n') continue;
+        removeSpaces(line);
+        if (strlen(line) == 0) continue;
+        if (line[0] == '#') continue;
         if (parseLine(line, key, value)) storeValue(key, value, config);
     }
 
     fclose(file);
+
+    validateConfigFile(config);
 }
 
 void printConfigFile(const ConfigFile* config)
@@ -109,7 +201,15 @@ void printConfigFile(const ConfigFile* config)
     printf("\nConfig file:\n");
     printf("skinMeshFileIn = %s\n", config->skinMeshFileIn);
     printf("skinMeshFileOut = %s\n", config->skinMeshFileOut);
-    printf("topoFile = %s\n", config->topoFile);
+    printf("topoFiles = ");
+    for (int i = 0; i < MAXSURF; ++i)
+    {
+        if (config->topoFiles[i][0] == '\0') break;
+        if (i > 0) printf(", ");
+        printf("%s", config->topoFiles[i]);
+    }
+    printf("\nnx = %zu\n", config->nx);
+    printf("ny = %zu\n", config->ny);
     printf("surfaceMeshFaces = ");
     for (int i = 0; i < MAXSURF; ++i)
     {
