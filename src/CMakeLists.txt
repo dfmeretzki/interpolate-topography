@@ -3,6 +3,7 @@ add_library(interpol_topography_lib
     mesh.c
     msh_parser.c
     msh_tokenizer.c
+    topography.c
     topography_parser.c
     utils.c
 )
@@ -12,4 +13,5 @@ target_include_directories(interpol_topography_lib PUBLIC
 target_link_libraries(interpol_topography_lib PUBLIC
     compiler_flags
     "$<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:Clang>>:m>"
+    PRIVATE GSL::gsl GSL::gslcblas
 )

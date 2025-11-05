@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 project(interpol_topography LANGUAGES C)
 
+# GNU Scientific Library
+find_package(GSL REQUIRED)
+
 option(TESTING "Enable testing" ON)
 
 if(TESTING)

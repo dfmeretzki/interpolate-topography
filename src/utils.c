@@ -42,3 +42,20 @@ void combinePaths(char* dest, const char* path1, const char* path2)
     if (needSeparator) sprintf(dest, "%s%c%s", path1, PATH_SEPARATOR, path2);
     else sprintf(dest, "%s%s", path1, path2);
 }
+
+void minMaxElement(const double* array, size_t n, double* min, double* max)
+{
+    *min = array[0];
+    *max = array[0];
+    for (size_t i = 1; i < n; ++i)
+    {
+        if (array[i] < *min)
+        {
+            *min = array[i];
+        }
+        if (array[i] > *max)
+        {
+            *max = array[i];
+        }
+    }
+}

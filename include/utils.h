@@ -15,4 +15,6 @@ void removeSpaces(char* s);
 
 void combinePaths(char* dest, const char* path1, const char* path2);
 
+void minMaxElement(const double* array, size_t n, double* min, double* max);
+
 #endif

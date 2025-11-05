@@ -13,6 +13,7 @@
 #include <stddef.h>
 
 #include "config_file.h"
+#include "topography.h"
 
 #define MAX_ELEM_NODES 32
 
@@ -32,7 +33,6 @@ typedef struct
     size_t nodes[MAX_ELEM_NODES];   // indexes of the nodes of the element
 } Element;
 
-
 typedef struct
 {
     size_t nNodes;              // number of nodes in the mesh
@@ -46,20 +46,11 @@ typedef struct
     unsigned int maxElemNodes;  // maximum number of nodes per element
 } Mesh;
 
-typedef struct
-{
-    size_t nx;                  // number of x-values on the grid
-    size_t ny;                  // number of y-values on the grid
-    double* xGrid;              // x-topography grid
-    double* yGrid;              // y-topography grid
-    double* values;             // topography values
-} Topography;
-
 void freeMesh(Mesh* mesh);
 
-void freeTopography(Topography* topo);
-
 int interpolateTopography(const ConfigFile* config, const Topography* topo, Mesh* mesh);
+
+int interpolate(const ConfigFile* config, Mesh* mesh);
 
 int smoothMesh(const ConfigFile* config, Mesh* mesh);
 

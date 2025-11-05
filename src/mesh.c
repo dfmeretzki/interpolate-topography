@@ -23,7 +23,7 @@ typedef struct
     size_t totalConnections;       // number of total connections
 } NodeConnections;
 
-static int markFaceNodes(const ConfigFile* config, Mesh* mesh)
+static int markFaceNodes(unsigned int face, Mesh* mesh)
 {
     if (mesh->mark == NULL)
     {
@@ -53,18 +53,12 @@ static int markFaceNodes(const ConfigFile* config, Mesh* mesh)
             {
                 mesh->maxElemNodes = mesh->elements[index].nNodes;
             }
-
-            for (int i = 0; i < MAXSURF; ++i)
+            if (face == mesh->elements[index].regElem)
             {
-                unsigned int faceNum = config->surfaceMeshFaces[i];
-                if (faceNum == 0) break;
-                if (faceNum == mesh->elements[index].regElem)
+                for (size_t j = 0; j < mesh->elements[index].nNodes; ++j)
                 {
-                    for (size_t j = 0; j < mesh->elements[index].nNodes; ++j)
-                    {
-                        size_t node = mesh->elements[index].nodes[j];
-                        mesh->mark[node] = 1;
-                    }
+                    size_t node = mesh->elements[index].nodes[j];
+                    mesh->mark[node] = 1;
                 }
             }
         }
@@ -277,23 +271,57 @@ void freeMesh(Mesh* mesh)
     mesh->mark = NULL;
 }
 
-void freeTopography(Topography* topo)
-{
-    free(topo->xGrid);
-    topo->xGrid = NULL;
-    free(topo->yGrid);
-    topo->yGrid = NULL;
-    free(topo->values);
-    topo->values = NULL;
-}
-
 int interpolateTopography(const ConfigFile* config, const Topography* topo, Mesh* mesh)
 {
-    if (!markFaceNodes(config, mesh)) return 0;
+    for (size_t i = 0; i < MAXSURF; ++i)
+    {
+        if (config->surfaceMeshFaces[i] == 0) break;
 
-    moveNodes(topo, mesh);
+        if (!markFaceNodes(config->surfaceMeshFaces[i], mesh)) return 0;
+
+        moveNodes(topo, mesh);
+    }
 
     return 1;
+}
+
+int interpolate(const ConfigFile* config, Mesh* mesh)
+{
+    int topoFilesCount = 0;
+    for (int i = 0; i < MAXSURF; ++i)
+    {
+        if (config->topoFiles[i][0] == '\0') break;
+        ++topoFilesCount;
+    }
+
+    int result = 1;
+    Topography topo = { 0 };
+    for (int i = 0; i < MAXSURF; ++i)
+    {
+        if (config->surfaceMeshFaces[i] == 0) break;
+
+        if (!markFaceNodes(config->surfaceMeshFaces[i], mesh))
+        {
+            result = 0;
+            goto out_free_topo;
+        }
+
+        if (i < topoFilesCount)
+        {
+            freeTopography(&topo);
+            if (!increaseTopographyResolution(config, config->topoFiles[i], &topo))
+            {
+                result = 0;
+                goto out_free_topo;
+            }
+        }
+
+        moveNodes(&topo, mesh);
+    }
+
+out_free_topo:
+    freeTopography(&topo);
+    return result;
 }
 
 int smoothMesh(const ConfigFile* config, Mesh* mesh)

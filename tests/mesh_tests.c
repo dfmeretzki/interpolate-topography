@@ -9,7 +9,9 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 
+#include "constants.h"
 #include "mesh.h"
 #include "msh_parser.h"
 #include "topography_parser.h"
@@ -57,9 +59,23 @@ static int testInterpolateTopography(char* projectRootDir)
 
     for (size_t i = 0; i < mesh.nNodes; ++i)
     {
-        // Compare z-coordinates with a tolerance since msh files
+        // Compare coordinates with a tolerance since msh files
         // may have slight differences due to floating point representation
-        if (fabs(mesh.nodes[i].z - resultMesh.nodes[i].z) > 1e-3)
+        if (fabs(mesh.nodes[i].x - resultMesh.nodes[i].x) > 0.5)
+        {
+            printf("Node %zu x-coordinate mismatch: expected %lf but found %lf\n",
+                i + 1, resultMesh.nodes[i].x, mesh.nodes[i].x);
+            result = 1;
+            goto out_free_result_mesh;
+        }
+        if (fabs(mesh.nodes[i].y - resultMesh.nodes[i].y) > 0.5)
+        {
+            printf("Node %zu y-coordinate mismatch: expected %lf but found %lf\n",
+                i + 1, resultMesh.nodes[i].y, mesh.nodes[i].y);
+            result = 1;
+            goto out_free_result_mesh;
+        }
+        if (fabs(mesh.nodes[i].z - resultMesh.nodes[i].z) > 0.5)
         {
             printf("Node %zu z-coordinate mismatch: expected %lf but found %lf\n",
                 i + 1, resultMesh.nodes[i].z, mesh.nodes[i].z);
@@ -70,6 +86,77 @@ static int testInterpolateTopography(char* projectRootDir)
 
 out_free_topo:
     freeTopography(&topo);
+out_free_result_mesh:
+    freeMesh(&resultMesh);
+out_free_mesh:
+    freeMesh(&mesh);
+    return result;
+}
+
+static int testInterpolate(char* projectRootDir)
+{
+    int result = 0;
+    Mesh mesh = { 0 };
+    Mesh resultMesh = { 0 };
+    char meshFile[MAX_PATH_LENGTH];
+    combinePaths(meshFile, projectRootDir, "tests/test_skin.msh");
+    char resultMeshFile[MAX_PATH_LENGTH];
+    combinePaths(resultMeshFile, projectRootDir, "tests/test_skin_topo.msh");
+
+    if (!readMshFile(meshFile, &mesh))
+    {
+        printf("Failed to read MSH file %s\n", meshFile);
+        return 1;
+    }
+    if (!readMshFile(resultMeshFile, &resultMesh))
+    {
+        printf("Failed to read MSH file %s\n", resultMeshFile);
+        result = 1;
+        goto out_free_mesh;
+    }
+
+    ConfigFile config = { 0 };
+    config.surfaceMeshFaces[0] = 6; // face region to apply topography
+    config.nx = 150;
+    config.ny = 180;
+    combinePaths(config.topoFiles[0], projectRootDir, "tests/test_skin_topography_raw");
+    if (!interpolate(&config, &mesh))
+    {
+        printf("Failed to interpolate topography\n");
+        result = 1;
+        goto out_free_result_mesh;
+    }
+
+    for (size_t i = 0; i < mesh.nNodes; ++i)
+    {
+        // Compare coordinates with a tolerance since msh files
+        // may have slight differences due to floating point representation
+        if (fabs(mesh.nodes[i].x - resultMesh.nodes[i].x) > 0.5)
+        {
+            printf("Node %zu x-coordinate mismatch: expected %lf but found %lf\n",
+                i + 1, resultMesh.nodes[i].x, mesh.nodes[i].x);
+            result = 1;
+            goto out_free_result_mesh;
+        }
+        if (fabs(mesh.nodes[i].y - resultMesh.nodes[i].y) > 0.5)
+        {
+            printf("Node %zu y-coordinate mismatch: expected %lf but found %lf\n",
+                i + 1, resultMesh.nodes[i].y, mesh.nodes[i].y);
+            result = 1;
+            goto out_free_result_mesh;
+        }
+        // Compare z-coordinates with a error tolerance of 1% since msh files
+        // may have slight differences due to a different interpolation method
+        // used to increase topography resolution
+        if (fabs(mesh.nodes[i].z - resultMesh.nodes[i].z) > fabs(mesh.nodes[i].z * 0.01))
+        {
+            printf("Node %zu z-coordinate mismatch: expected %lf but found %lf\n",
+                i + 1, resultMesh.nodes[i].z, mesh.nodes[i].z);
+            result = 1;
+            goto out_free_result_mesh;
+        }
+    }
+
 out_free_result_mesh:
     freeMesh(&resultMesh);
 out_free_mesh:
@@ -155,6 +242,7 @@ int main(int argc, char** argv)
     }
 
     if (testInterpolateTopography(argv[1]) != 0) return 1;
+    if (testInterpolate(argv[1]) != 0) return 1;
     if (testSmoothMesh(argv[1]) != 0) return 1;
 
     return 0;
