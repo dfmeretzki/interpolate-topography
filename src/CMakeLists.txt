@@ -9,9 +9,14 @@ add_library(interpol_topography_lib
 )
 target_include_directories(interpol_topography_lib PUBLIC 
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/libs/segyio/include
 )
-target_link_libraries(interpol_topography_lib PUBLIC
-    compiler_flags
-    "$<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:Clang>>:m>"
-    PRIVATE GSL::gsl GSL::gslcblas
+target_link_libraries(interpol_topography_lib
+    PUBLIC
+        compiler_flags
+        "$<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:Clang>>:m>"
+    PRIVATE
+        GSL::gsl
+        GSL::gslcblas
+        segyio
 )

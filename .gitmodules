@@ -1,0 +1,3 @@
+[submodule "libs/segyio"]
+	path = libs/segyio
+	url = https://github.com/equinor/segyio.git

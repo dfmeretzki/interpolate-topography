@@ -4,6 +4,13 @@ project(interpol_topography LANGUAGES C)
 # GNU Scientific Library
 find_package(GSL REQUIRED)
 
+# segyio library
+set(BUILD_BIN OFF CACHE BOOL "Build segyio applications" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build language bindings shared" FORCE)
+set(BUILD_PYTHON OFF CACHE BOOL "Build python bindings" FORCE)
+set(BUILD_MEX OFF CACHE BOOL "Build matlab bindings" FORCE)
+add_subdirectory(libs/segyio)
+
 option(TESTING "Enable testing" ON)
 
 if(TESTING)
