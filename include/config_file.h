@@ -26,6 +26,14 @@ typedef struct
     // Used in the smoothing algorithm
     int iterMaxSmooth;                          // default value = 200
     double tolerSmooth;                         // default value = 0.01
+
+    // Used in the background mesh generation
+    char resistivityFile[MAX_PATH_LENGTH];       // the input resistivity file name
+    char backgroundMeshFile[MAX_PATH_LENGTH];    // the output background mesh file name
+    double frequency;                            // default value = 1.0
+    double rSkinDepth;                           // default value = 2.0
+    double emitterLength;                        // default value = 1.0
+    double rsFactor;                             // default value = 10.0
 } ConfigFile;
 
 void readConfigFile(const char* filename, ConfigFile* config);

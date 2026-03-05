@@ -96,6 +96,30 @@ static void storeValue(const char* restrict key, char* restrict value, ConfigFil
     {
         config->tolerSmooth = atof(value);
     }
+    else if (strcmp("resistivityFile", key) == 0)
+    {
+        strcpy(config->resistivityFile, value);
+    }
+    else if (strcmp("backgroundMeshFile", key) == 0)
+    {
+        strcpy(config->backgroundMeshFile, value);
+    }
+    else if (strcmp("frequency", key) == 0)
+    {
+        config->frequency = atof(value);
+    }
+    else if (strcmp("rSkinDepth", key) == 0)
+    {
+        config->rSkinDepth = atof(value);
+    }
+    else if (strcmp("emitterLength", key) == 0)
+    {
+        config->emitterLength = atof(value);
+    }
+    else if (strcmp("rsFactor", key) == 0)
+    {
+        config->rsFactor = atof(value);
+    }
     else
     {
         printf("Found unrecongnized key: %s", key);
@@ -165,6 +189,36 @@ void validateConfigFile(const ConfigFile* config)
         fprintf(stderr, "Error: tolerSmooth must be greater than 0.0\n");
         exit(EXIT_FAILURE);
     }
+    if (config->resistivityFile[0] == '\0')
+    {
+        fprintf(stderr, "Error: resistivityFile not defined in config file\n");
+        exit(EXIT_FAILURE);
+    }
+    if (config->backgroundMeshFile[0] == '\0')
+    {
+        fprintf(stderr, "Error: backgroundMeshFile not defined in config file\n");
+        exit(EXIT_FAILURE);
+    }
+    if (config->frequency <= 0.0)
+    {
+        fprintf(stderr, "Error: frequency must be greater than 0.0\n");
+        exit(EXIT_FAILURE);
+    }
+    if (config->rSkinDepth <= 0.0)
+    {
+        fprintf(stderr, "Error: rSkinDepth must be greater than 0.0\n");
+        exit(EXIT_FAILURE);
+    }
+    if (config->emitterLength <= 0.0)
+    {
+        fprintf(stderr, "Error: emitterLength must be greater than 0.0\n");
+        exit(EXIT_FAILURE);
+    }
+    if (config->rsFactor <= 0.0)
+    {
+        fprintf(stderr, "Error: rsFactor must be greater than 0.0\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void readConfigFile(const char* filename, ConfigFile* config)
@@ -172,6 +226,10 @@ void readConfigFile(const char* filename, ConfigFile* config)
     // set default values in case they are not defined
     config->iterMaxSmooth = 200;
     config->tolerSmooth = 0.01;
+    config->frequency = 1.0;
+    config->rSkinDepth = 2.0;
+    config->emitterLength = 1.0;
+    config->rsFactor = 10.0;
 
     FILE* file = fopen(filename, "r");
     if (file == NULL)
@@ -226,4 +284,10 @@ void printConfigFile(const ConfigFile* config)
     }
     printf("\niterMaxSmooth = %d\n", config->iterMaxSmooth);
     printf("tolerSmooth = %lf\n", config->tolerSmooth);
+    printf("resistivityFile = %s\n", config->resistivityFile);
+    printf("backgroundMeshFile = %s\n", config->backgroundMeshFile);
+    printf("frequency = %lf\n", config->frequency);
+    printf("rSkinDepth = %lf\n", config->rSkinDepth);
+    printf("emitterLength = %lf\n", config->emitterLength);
+    printf("rsFactor = %lf\n", config->rsFactor);
 }
