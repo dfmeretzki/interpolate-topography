@@ -4,6 +4,7 @@ add_library(interpol_topography_lib
     msh_parser.c
     msh_tokenizer.c
     topography.c
+    resistivity_parser.c
     topography_parser.c
     utils.c
 )
