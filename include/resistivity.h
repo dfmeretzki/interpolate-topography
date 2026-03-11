@@ -4,7 +4,7 @@
     Date: 2026-03-10
 
     Description:
-    This file contains the declarations of the resistivity structure and it's functions
+    This file contains the declarations of the resistivity structure and its functions
 */
 
 #ifndef RESISTIVITY_H
@@ -26,5 +26,7 @@ typedef struct
     float maxZ;             // maximum Z coordinate (t0 + (nz-1)*dz)
     float minResistivity;   // minimum resistivity value in the dataset
 } Resistivity;
+
+float skinDepth(float frequency, float resistivity);
 
 #endif // RESISTIVITY_H

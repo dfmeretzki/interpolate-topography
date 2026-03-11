@@ -1,10 +1,12 @@
 add_library(interpol_topography_lib
+    background_mesh.c
     config_file.c
     mesh.c
     msh_parser.c
     msh_tokenizer.c
     topography.c
     resistivity_parser.c
+    resistivity.c
     topography_parser.c
     utils.c
 )

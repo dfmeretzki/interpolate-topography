@@ -11,6 +11,8 @@
 #ifndef CONFIG_FILE_H
 #define CONFIG_FILE_H
 
+#include <stddef.h>
+
 #include "constants.h"
 
 typedef struct
