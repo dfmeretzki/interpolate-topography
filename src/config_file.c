@@ -100,6 +100,10 @@ static void storeValue(const char* restrict key, char* restrict value, ConfigFil
     {
         strcpy(config->resistivityFile, value);
     }
+    else if (strcmp("sourcesFile", key) == 0)
+    {
+        strcpy(config->sourcesFile, value);
+    }
     else if (strcmp("backgroundMeshFile", key) == 0)
     {
         strcpy(config->backgroundMeshFile, value);
@@ -194,6 +198,11 @@ void validateConfigFile(const ConfigFile* config)
         fprintf(stderr, "Error: resistivityFile not defined in config file\n");
         exit(EXIT_FAILURE);
     }
+    if (config->sourcesFile[0] == '\0')
+    {
+        fprintf(stderr, "Error: sourcesFile not defined in config file\n");
+        exit(EXIT_FAILURE);
+    }
     if (config->backgroundMeshFile[0] == '\0')
     {
         fprintf(stderr, "Error: backgroundMeshFile not defined in config file\n");
@@ -285,6 +294,7 @@ void printConfigFile(const ConfigFile* config)
     printf("\niterMaxSmooth = %d\n", config->iterMaxSmooth);
     printf("tolerSmooth = %lf\n", config->tolerSmooth);
     printf("resistivityFile = %s\n", config->resistivityFile);
+    printf("sourcesFile = %s\n", config->sourcesFile);
     printf("backgroundMeshFile = %s\n", config->backgroundMeshFile);
     printf("frequency = %lf\n", config->frequency);
     printf("rSkinDepth = %lf\n", config->rSkinDepth);

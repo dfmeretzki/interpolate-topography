@@ -31,6 +31,7 @@ typedef struct
 
     // Used in the background mesh generation
     char resistivityFile[MAX_PATH_LENGTH];       // the input resistivity file name
+    char sourcesFile[MAX_PATH_LENGTH];           // the input sources/receivers file name
     char backgroundMeshFile[MAX_PATH_LENGTH];    // the output background mesh file name
     double frequency;                            // default value = 1.0
     double rSkinDepth;                           // default value = 2.0

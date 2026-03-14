@@ -17,4 +17,6 @@ void combinePaths(char* dest, const char* path1, const char* path2);
 
 void minMaxElement(const double* array, size_t n, double* min, double* max);
 
+int clampi(int value, int min, int max);
+
 #endif

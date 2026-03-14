@@ -59,3 +59,8 @@ void minMaxElement(const double* array, size_t n, double* min, double* max)
         }
     }
 }
+
+int clampi(int value, int min, int max)
+{
+    return value < min ? min : (value > max ? max : value);
+}
