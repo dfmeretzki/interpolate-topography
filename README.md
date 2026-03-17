@@ -1,11 +1,11 @@
 # AMGEM - Adaptive Mesh Generator for Geophysical Electromagnetic Modeling
 
-> A companion preprocessing tool for [PETGEM](https://petgem.bsc.es/).  
+> A companion preprocessing tool for [PETGEM](https://github.com/ocastilloreyes/petgem).  
 > Automates the generation of simulation ready tetrahedral FE meshes for 3D CSEM surveys.
 
 ## Overview
 
-**AMGEM** bridges the gap between raw geophysical survey data and a simulation ready mesh for [PETGEM](https://petgem.bsc.es/) (Parallel Exascale Toolkit for Geophysical Electromagnetic Modeling). Starting from a base Gmsh boundary mesh, it executes a fully automated pipeline:
+**AMGEM** bridges the gap between raw geophysical survey data and a simulation ready mesh for [PETGEM](https://github.com/ocastilloreyes/petgem) (Parallel Exascale Toolkit for Geophysical Electromagnetic Modeling). Starting from a base Gmsh boundary mesh, it executes a fully automated pipeline:
 
 1. **Multi-surface topography interpolation** — displaces mesh nodes on any number of
    geological faces (bathymetry, basement, etc.) to conform to real survey data in gridded or raw coordinate format.
@@ -21,8 +21,33 @@ The output background mesh file is passed directly into a Gmsh `.geo` script to 
 |---|---|---|
 | CMake | ≥ 3.25 | |
 | C compiler | C23 | GCC / Clang |
-| Gmsh | any | For creating the base `.msh` mesh |
 | segyio | 1.9.14 | Included as a Git submodule |
+| GNU Scientific Library (gsl) | ≥ 2.0 | |
+
+
+Install GSL on Debian/Ubuntu:
+
+```bash
+sudo apt install libgsl-dev
+```
+
+Install GSL on Fedora/RHEL/CentOS Stream:
+
+```bash
+sudo dnf install gsl-devel
+```
+
+Install GSL on Arch Linux:
+
+```bash
+sudo pacman -S gsl
+```
+
+Install GSL on macOS (Homebrew):
+
+```bash
+brew install gsl
+```
 
 Getting started
 --------
@@ -47,13 +72,14 @@ cmake -S . -B build
 cmake --build build
 ```
 
-Or use one of the provided presets for debug and release builds
+Or use one of the provided presets for debug and release builds. For debug builds use
+
 ```bash
-# Debug build
 cmake --preset debug
 cmake --build --preset debug
-
-# Release build
+```
+and for release builds use
+```bash
 cmake --preset release
 cmake --build --preset release
 ```
