@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "background_mesh.h"
 #include "config_file.h"
 #include "msh_parser.h"
 #include "topography_parser.h"
@@ -42,6 +43,7 @@ int main(int argc, char** argv)
         result = EXIT_FAILURE;
         goto out_free_mesh;
     }
+    fprintf(stdout, "Successfully interpolated topography and smoothed the mesh\n");
 
     // Write the mesh to a .msh file
     if (!writeMshFile(config.skinMeshFileOut, &mesh, MSH_V1))
@@ -51,6 +53,17 @@ int main(int argc, char** argv)
         result = EXIT_FAILURE;
         goto out_free_mesh;
     }
+    fprintf(stdout, "Resulting mesh exported to '%s'\n", config.skinMeshFileOut);
+
+    // Generate the background mesh
+    if (!generateBackgroundMesh(&config))
+    {
+        fprintf(stderr, "Failed to generate background mesh\n");
+        result = EXIT_FAILURE;
+        goto out_free_mesh;
+    }
+    fprintf(stdout, "Successfully generated background mesh '%s'\n",
+        config.backgroundMeshFile);
 
 out_free_mesh:
     freeMesh(&mesh);
