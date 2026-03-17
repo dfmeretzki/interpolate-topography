@@ -5,7 +5,7 @@ target_include_directories(msh_tokenizer_tests
 )
 target_link_libraries(msh_tokenizer_tests PUBLIC
 	compiler_flags
-	interpol_topography_lib
+	amgem_lib
 )
 add_test(msh_tokenizer_tests msh_tokenizer_tests)
 
@@ -16,7 +16,7 @@ target_include_directories(msh_parser_tests
 )
 target_link_libraries(msh_parser_tests PUBLIC
 	compiler_flags
-	interpol_topography_lib
+	amgem_lib
 	"$<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:Clang>>:m>"
 )
 add_test(msh_parser_tests msh_parser_tests ${CMAKE_SOURCE_DIR})
@@ -28,7 +28,7 @@ target_include_directories(topography_parser_tests
 )
 target_link_libraries(topography_parser_tests PUBLIC
 	compiler_flags
-	interpol_topography_lib
+	amgem_lib
 )
 add_test(topography_parser_tests topography_parser_tests ${CMAKE_SOURCE_DIR})
 
@@ -39,7 +39,7 @@ target_include_directories(mesh_tests
 )
 target_link_libraries(mesh_tests PUBLIC
 	compiler_flags
-	interpol_topography_lib
+	amgem_lib
 	"$<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:Clang>>:m>"
 )
 add_test(mesh_tests mesh_tests ${CMAKE_SOURCE_DIR})
@@ -51,7 +51,7 @@ target_include_directories(topography_tests
 )
 target_link_libraries(topography_tests PUBLIC
 	compiler_flags
-	interpol_topography_lib
+	amgem_lib
 	"$<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:Clang>>:m>"
 )
 add_test(topography_tests topography_tests ${CMAKE_SOURCE_DIR})

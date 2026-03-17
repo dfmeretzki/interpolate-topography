@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(interpol_topography LANGUAGES C)
+project(AMGEM LANGUAGES C)
 
 # GNU Scientific Library
 find_package(GSL REQUIRED)
@@ -23,16 +23,16 @@ target_compile_options(compiler_flags INTERFACE
     -Wall -Wextra -pedantic -Werror
 )
 
-add_executable(interpol_topography src/main.c)
+add_executable(amgem src/main.c)
 
 
 add_subdirectory(src)
 
-target_include_directories(interpol_topography PUBLIC include)
+target_include_directories(amgem PUBLIC include)
 
-target_link_libraries(interpol_topography PUBLIC
+target_link_libraries(amgem PUBLIC
     compiler_flags
-    interpol_topography_lib
+    amgem_lib
 )
 
 if(TESTING)

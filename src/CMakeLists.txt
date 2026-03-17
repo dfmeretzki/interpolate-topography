@@ -1,4 +1,4 @@
-add_library(interpol_topography_lib
+add_library(amgem_lib
     background_mesh.c
     config_file.c
     mesh.c
@@ -10,11 +10,11 @@ add_library(interpol_topography_lib
     topography_parser.c
     utils.c
 )
-target_include_directories(interpol_topography_lib PUBLIC 
+target_include_directories(amgem_lib PUBLIC 
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/libs/segyio/include
 )
-target_link_libraries(interpol_topography_lib
+target_link_libraries(amgem_lib
     PUBLIC
         compiler_flags
         "$<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:Clang>>:m>"

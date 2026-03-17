@@ -5,7 +5,7 @@
 
     Description:
     This file contains a collection definitions of common utility functions that
-    are used throughout the Interpol Topography project
+    are used throughout the AMGEM project
 */
 
 #include <ctype.h>

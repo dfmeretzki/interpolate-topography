@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 {
     if (argc < 2)
     {
-        printf("usage: interpol_topography <config file>\n");
+        printf("usage: amgem <config file>\n");
         exit(EXIT_FAILURE);
     }
 

@@ -5,7 +5,7 @@
 
     Description:
     This file contains a collection of constants that are used throughout the
-    Interpol Topography project
+    AMGEM project
 */
 
 #ifndef CONSTANTS_H

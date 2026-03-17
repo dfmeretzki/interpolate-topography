@@ -5,7 +5,7 @@
 
     Description:
     This file contains a collection of declarations for common utility functions
-    that are used throughout the Interpol Topography project 
+    that are used throughout the AMGEM project 
 */
 
 #ifndef UTILS_H
