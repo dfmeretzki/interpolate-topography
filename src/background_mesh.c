@@ -152,7 +152,7 @@ int generateBackgroundMesh(const ConfigFile* config)
     Node* nodes = NULL;
     size_t nNodes = 0;
     if (config->sourcesFile[0] != '\0'
-        && !readRawTopographyFile(config->sourcesFile, &nodes, &nNodes))
+        && !readXYZFile(config->sourcesFile, &nodes, &nNodes))
     {
         fprintf(stderr, "Failed to read sources/receivers file '%s'\n", config->sourcesFile);
         return 0;

@@ -101,7 +101,7 @@ out_close_file:
     return result;
 }
 
-int readRawTopographyFile(const char* filename, Node** nodes, size_t* nNodes)
+int readXYZFile(const char* filename, Node** nodes, size_t* nNodes)
 {
     FILE* file = fopen(filename, "r");
     if (file == NULL)

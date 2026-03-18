@@ -8,7 +8,7 @@
 **AMGEM** bridges the gap between raw geophysical survey data and a simulation ready mesh for [PETGEM](https://github.com/ocastilloreyes/petgem) (Parallel Exascale Toolkit for Geophysical Electromagnetic Modeling). Starting from a base Gmsh boundary mesh, it executes a fully automated pipeline:
 
 1. **Multi-surface topography interpolation** — displaces mesh nodes on any number of
-   geological faces (bathymetry, basement, etc.) to conform to real survey data in gridded or raw coordinate format.
+   geological faces (bathymetry, basement, etc.) to conform to real survey data in gridded or XYZ coordinate format.
 2. **Laplacian mesh smoothing** — iteratively repositions interior nodes to the centroid of their neighbours, improving element quality after interpolation.
 3. **Skin-depth computation** — reads a 3D resistivity model (SEG-Y) and computes the electromagnetic skin-depth across the domain to derive physically motivated element sizes.
 4. **Background mesh generation** — produces a Gmsh `.pos` file that encodes spatially varying target element sizes: globally driven by the minimum skin-depth and locally refined near survey sources and receivers using a bin grid spatial index.
@@ -177,7 +177,7 @@ rsFactor = 10.0
 
 ### Topography file format
 
-Grid format  for regularly sampled datasets:
+Grid format for regularly sampled datasets:
 ```
 <nx> <ny>
 <x_1> <x_2> ... <x_nx>
@@ -187,13 +187,13 @@ Grid format  for regularly sampled datasets:
 <z_1,ny> <z_2,ny> ... <z_nx,ny>
 ```
 
-Raw XYZ format — for irregularly spaced survey points:
+XYZ format for irregularly spaced survey points:
 ```
 <x_1> <y_1> <z_1>
 <x_2> <y_2> <z_2>
 ...
 ```
-The same raw XYZ format is used for sourcesFile.
+The same XYZ format is used for sourcesFile.
 
 ---
 

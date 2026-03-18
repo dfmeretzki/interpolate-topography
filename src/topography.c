@@ -167,9 +167,9 @@ int increaseTopographyResolution(const ConfigFile* config,
     int result = 1;
     Node* nodes = NULL;
     size_t nNodes = 0;
-    if (!readRawTopographyFile(filename, &nodes, &nNodes))
+    if (!readXYZFile(filename, &nodes, &nNodes))
     {
-        fprintf(stderr, "Error reading raw topography file: %s\n", filename);
+        fprintf(stderr, "Error reading XYZ topography file: %s\n", filename);
         return 0;
     }
 

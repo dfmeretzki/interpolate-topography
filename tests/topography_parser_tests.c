@@ -103,9 +103,9 @@ static int testReadRawTopographyFile(char* projectRootDir)
         { 720600, 1.1732e+06, 479.897 },
     };
 
-    if (!readRawTopographyFile(filename, &nodes, &nNodes))
+    if (!readXYZFile(filename, &nodes, &nNodes))
     {
-        printf("Failed to read raw topography file %s\n", filename);
+        printf("Failed to read XYZ topography file %s\n", filename);
         return 1;
     }
     if (nNodes != expectedNNodes)
