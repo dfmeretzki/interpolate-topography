@@ -9,8 +9,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "topography_parser.h"
+#include "utils.h"
 
 int readTopographyFile(const char* filename, Topography* topo)
 {
@@ -119,28 +121,47 @@ int readXYZFile(const char* filename, Node** nodes, size_t* nNodes)
         return 0;
     }
 
+    int result = 1;
     size_t count = 0;
-    while (fscanf(file, "%lf %lf %lf",
-        &(*nodes)[count].x,
-        &(*nodes)[count].y,
-        &(*nodes)[count].z) == 3)
+    char line[1024];
+    while (fgets(line, sizeof(line), file))
     {
-        ++count;
-        if (count >= capacity)
+        char *ptr = line;
+        ptr = skipLeadingSpaces(ptr);
+        if (*ptr == '#' || *ptr == '\0') continue;
+        if (sscanf(ptr, "%lf %lf %lf",
+            &(*nodes)[count].x,
+            &(*nodes)[count].y,
+            &(*nodes)[count].z) == 3)
         {
-            capacity *= 2;
-            Node* temp = (Node*)realloc(*nodes, capacity * sizeof(Node));
-            if (temp == NULL)
+            ++count;
+            if (count >= capacity)
             {
-                fprintf(stderr, "Could not reallocate memory for %zu nodes\n", capacity);
-                free(*nodes);
-                fclose(file);
-                return 0;
+                capacity *= 2;
+                Node* temp = (Node*)realloc(*nodes, capacity * sizeof(Node));
+                if (temp == NULL)
+                {
+                    fprintf(stderr, "Could not reallocate memory for %zu nodes\n", capacity);
+                    result = 0;
+                    goto out_free_nodes;
+                }
+                *nodes = temp;
             }
-            *nodes = temp;
+        }
+        else
+        {
+            fprintf(stderr, "Format error, cannot parse line: %s\n", line);
+            result = 0;
+            goto out_free_nodes;
         }
     }
 
+    goto out_close_file;
+
+out_free_nodes:
+    free(*nodes);
+    *nodes = NULL;
+out_close_file:
     fclose(file);
     *nNodes = count;
     if (count == 0)
@@ -149,5 +170,5 @@ int readXYZFile(const char* filename, Node** nodes, size_t* nNodes)
         *nodes = NULL;
     }
 
-    return 1;
+    return result;
 }

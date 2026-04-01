@@ -30,6 +30,12 @@ void removeSpaces(char* s)
     while ((*s++ = *x++));
 }
 
+char* skipLeadingSpaces(char* s) 
+{
+    while (isspace(*s)) ++s;
+    return s;
+}
+
 void combinePaths(char* dest, const char* path1, const char* path2)
 {
     size_t len1 = strlen(path1);

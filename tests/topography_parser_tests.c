@@ -81,7 +81,7 @@ out_free_topo:
     return result;
 }
 
-static int testReadRawTopographyFile(char* projectRootDir)
+static int testReadXYZFile(char* projectRootDir)
 {
     int result = 0;
     Node* nodes = NULL;
@@ -144,7 +144,7 @@ int main(int argc, char** argv)
     }
 
     if (testReadTopographyFile(argv[1]) != 0) return 1;
-    if (testReadRawTopographyFile(argv[1]) != 0) return 1;
+    if (testReadXYZFile(argv[1]) != 0) return 1;
 
     return 0;
 }

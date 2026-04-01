@@ -5,13 +5,17 @@
 
     Description:
     This file contains a collection of declarations for common utility functions
-    that are used throughout the AMGEM project 
+    that are used throughout the AMGEM project
 */
 
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <stddef.h>
+
 void removeSpaces(char* s);
+
+char* skipLeadingSpaces(char* s);
 
 void combinePaths(char* dest, const char* path1, const char* path2);
 
