@@ -12,11 +12,20 @@
 #define CONFIG_FILE_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 #include "constants.h"
 
+enum ConfigMode : uint8_t
+{
+    MODE_INTERPOLATE = 1 << 0,
+    MODE_BACKGROUND_MESH = 1 << 1,
+    MODE_ALL = MODE_INTERPOLATE | MODE_BACKGROUND_MESH
+};
+
 typedef struct
 {
+    enum ConfigMode mode;                       // the mode of operation
     char skinMeshFileIn[MAX_PATH_LENGTH];       // the input mesh file name
     char skinMeshFileOut[MAX_PATH_LENGTH];      // the output mesh file name
     char topoFiles[MAXSURF][MAX_PATH_LENGTH];   // the topography files (grid) names
@@ -30,6 +39,7 @@ typedef struct
     double tolerSmooth;                         // default value = 0.01
 
     // Used in the background mesh generation
+    double minResistivity;                       // the minimum resistivity value, if not defined it will be calculated from the resistivity file
     char resistivityFile[MAX_PATH_LENGTH];       // the input resistivity file name
     char sourcesFile[MAX_PATH_LENGTH];           // the input sources/receivers file name
     char backgroundMeshFile[MAX_PATH_LENGTH];    // the output background mesh file name
@@ -37,6 +47,7 @@ typedef struct
     double rSkinDepth;                           // default value = 2.0
     double emitterLength;                        // default value = 1.0
     double rsFactor;                             // default value = 10.0
+    double growthFactor;                         // default value = 1.25
 } ConfigFile;
 
 void readConfigFile(const char* filename, ConfigFile* config);

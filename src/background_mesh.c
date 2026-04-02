@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mesh.h"
 #include "resistivity_parser.h"
 #include "resistivity.h"
 #include "topography_parser.h"
@@ -99,12 +100,11 @@ out:
     return result;
 }
 
-static float elementSize(const BinGrid* grid, const Node* nodes,
+static float elementSize(const BinGrid* grid, const Node* nodes, float growthFactor,
     float x, float y, float z, float skinSize, float sourceSize)
 {
     if (grid->bins == NULL) return skinSize;
 
-    const float growth = 1.25f;
     float size = skinSize;
 
     int bix = clampi((int)floorf((x - grid->minX) / grid->h), 0, grid->nx - 1);
@@ -128,7 +128,7 @@ static float elementSize(const BinGrid* grid, const Node* nodes,
                     if (d > grid->h) continue;
 
                     int layer = (int)floorf(d / skinSize);
-                    float sSize = sourceSize * powf(growth, (float)layer);
+                    float sSize = sourceSize * powf(growthFactor, (float)layer);
                     if (sSize < size) size = sSize;
                 }
             }
@@ -138,16 +138,36 @@ static float elementSize(const BinGrid* grid, const Node* nodes,
     return size;
 }
 
-int generateBackgroundMesh(const ConfigFile* config)
+static int initResistivity(const ConfigFile* config, const Mesh* mesh, Resistivity* res)
+{
+    if (isnan(config->minResistivity))
+    {
+        if (!readSEGYFile(config->resistivityFile, res))
+        {
+            fprintf(stderr, "Failed to read resistivity file '%s'\n", config->resistivityFile);
+            return 0;
+        }
+        return 1;
+    }
+
+    getShape(mesh, &res->minX, &res->maxX, &res->minY, &res->maxY, &res->minZ, &res->maxZ);
+    res->dx = 50.0f;
+    res->dy = 50.0f;
+    res->dz = 50.0f;
+    res->nx = (int)floorf((res->maxX - res->minX) / res->dx) + 1;
+    res->ny = (int)floorf((res->maxY - res->minY) / res->dy) + 1;
+    res->nz = (int)floorf((res->maxZ - res->minZ) / res->dz) + 1;
+    res->minResistivity = config->minResistivity;
+
+    return 1;
+}
+
+int generateBackgroundMesh(const ConfigFile* config, const Mesh* mesh)
 {
     int result = 1;
 
     Resistivity res;
-    if (!readSEGYFile(config->resistivityFile, &res))
-    {
-        fprintf(stderr, "Failed to read resistivity file '%s'\n", config->resistivityFile);
-        return 0;
-    }
+    if (!initResistivity(config, mesh, &res))  return 0;
 
     Node* nodes = NULL;
     size_t nNodes = 0;
@@ -191,7 +211,8 @@ int generateBackgroundMesh(const ConfigFile* config)
             for (int k = 0; k <= res.nz; ++k)
             {
                 float z = res.minZ + k * res.dz;
-                float size = elementSize(&grid, nodes, x, y, z, skinSize, sourceSize);
+                float size = elementSize(&grid, nodes, config->growthFactor,
+                    x, y, z, skinSize, sourceSize);
                 fprintf(file, "SP(%f,%f,%f){%f};\n", x, y, z, size);
             }
         }

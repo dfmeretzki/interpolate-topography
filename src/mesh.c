@@ -271,6 +271,26 @@ void freeMesh(Mesh* mesh)
     mesh->mark = NULL;
 }
 
+void getShape(const Mesh* mesh, float* minX, float* maxX, float* minY, float* maxY,
+    float* minZ, float* maxZ)
+{
+    if (mesh->nNodes == 0) return;
+
+    *minX = *maxX = mesh->nodes[0].x;
+    *minY = *maxY = mesh->nodes[0].y;
+    *minZ = *maxZ = mesh->nodes[0].z;
+
+    for (size_t i = 1; i < mesh->nNodes; ++i)
+    {
+        if (mesh->nodes[i].x < *minX) *minX = mesh->nodes[i].x;
+        if (mesh->nodes[i].x > *maxX) *maxX = mesh->nodes[i].x;
+        if (mesh->nodes[i].y > *maxY) *maxY = mesh->nodes[i].y;
+        if (mesh->nodes[i].y < *minY) *minY = mesh->nodes[i].y;
+        if (mesh->nodes[i].z > *maxZ) *maxZ = mesh->nodes[i].z;
+        if (mesh->nodes[i].z < *minZ) *minZ = mesh->nodes[i].z;
+    }
+}
+
 int interpolateTopography(const ConfigFile* config, const Topography* topo, Mesh* mesh)
 {
     for (size_t i = 0; i < MAXSURF; ++i)

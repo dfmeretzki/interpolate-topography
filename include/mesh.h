@@ -48,6 +48,9 @@ typedef struct
 
 void freeMesh(Mesh* mesh);
 
+void getShape(const Mesh* mesh, float* minX, float* maxX, float* minY, float* maxY,
+    float* minZ, float* maxZ);
+
 int interpolateTopography(const ConfigFile* config, const Topography* topo, Mesh* mesh);
 
 int interpolate(const ConfigFile* config, Mesh* mesh);

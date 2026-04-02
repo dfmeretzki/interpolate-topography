@@ -11,7 +11,8 @@
 #define BACKGROUND_MESH_H
 
 #include "config_file.h"
+#include "mesh.h"
 
-int generateBackgroundMesh(const ConfigFile* config);
+int generateBackgroundMesh(const ConfigFile* config, const Mesh* mesh);
 
 #endif // BACKGROUND_MESH_H

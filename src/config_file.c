@@ -9,6 +9,8 @@
 */
 
 #include <errno.h>
+#include <float.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -60,7 +62,28 @@ static void parseStringArray(char* value, char arr[MAXSURF][MAX_PATH_LENGTH])
 
 static void storeValue(const char* restrict key, char* restrict value, ConfigFile* config)
 {
-    if (strcmp("skinMeshFileIn", key) == 0)
+    if (strcmp("mode", key) == 0)
+    {
+        if (strcmp(value, "all") == 0)
+        {
+            config->mode = MODE_ALL;
+        }
+        else if (strcmp(value, "interpolate") == 0)
+        {
+            config->mode = MODE_INTERPOLATE;
+        }
+        else if (strcmp(value, "background_mesh") == 0)
+        {
+            config->mode = MODE_BACKGROUND_MESH;
+        }
+        else
+        {
+            printf("Error: unrecognized mode value '%s'\n", value);
+            printf("Valid values are: 'all', 'interpolate', 'background_mesh'\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+    else if (strcmp("skinMeshFileIn", key) == 0)
     {
         strcpy(config->skinMeshFileIn, value);
     }
@@ -96,6 +119,10 @@ static void storeValue(const char* restrict key, char* restrict value, ConfigFil
     {
         config->tolerSmooth = atof(value);
     }
+    else if (strcmp("minResistivity", key) == 0)
+    {
+        config->minResistivity = atof(value);
+    }
     else if (strcmp("resistivityFile", key) == 0)
     {
         strcpy(config->resistivityFile, value);
@@ -124,9 +151,13 @@ static void storeValue(const char* restrict key, char* restrict value, ConfigFil
     {
         config->rsFactor = atof(value);
     }
+    else if (strcmp("growthFactor", key) == 0)
+    {
+        config->growthFactor = atof(value);
+    }
     else
     {
-        printf("Found unrecongnized key: %s", key);
+        printf("Found unrecongnized key: %s\n", key);
     }
 }
 
@@ -137,108 +168,124 @@ void validateConfigFile(const ConfigFile* config)
         fprintf(stderr, "Error: skinMeshFileIn not defined in config file\n");
         exit(EXIT_FAILURE);
     }
-    if (config->skinMeshFileOut[0] == '\0')
+
+    if (config->mode & MODE_INTERPOLATE)
     {
-        fprintf(stderr, "Error: skinMeshFileOut not defined in config file\n");
-        exit(EXIT_FAILURE);
+        if (config->skinMeshFileOut[0] == '\0')
+        {
+            fprintf(stderr, "Error: skinMeshFileOut not defined in config file\n");
+            exit(EXIT_FAILURE);
+        }
+
+        int topoFileCount = 0;
+        for (int i = 0; i < MAXSURF; ++i)
+        {
+            if (config->topoFiles[i][0] == '\0') break;
+            ++topoFileCount;
+        }
+        int surfaceFaceCount = 0;
+        for (int i = 0; i < MAXSURF; ++i)
+        {
+            if (config->surfaceMeshFaces[i] == 0) break;
+            ++surfaceFaceCount;
+        }
+
+        if (topoFileCount == 0)
+        {
+            fprintf(stderr, "Error: topoFiles not defined in config file\n");
+            exit(EXIT_FAILURE);
+        }
+        if (topoFileCount > 1 && topoFileCount != surfaceFaceCount)
+        {
+            fprintf(stderr, "Error: number of topoFiles (%d) does not match number of surfaceMeshFaces (%d)\n"
+                "If more than one topography file is provided, there must be a corresponding surface face for each file.\n",
+                topoFileCount, surfaceFaceCount);
+            exit(EXIT_FAILURE);
+        }
+        if (surfaceFaceCount == 0)
+        {
+            fprintf(stderr, "Error: surfaceMeshFaces not defined in config file\n");
+            exit(EXIT_FAILURE);
+        }
+        if (config->nx == 0)
+        {
+            fprintf(stderr, "Error: nx not defined in config file\n");
+            exit(EXIT_FAILURE);
+        }
+        if (config->ny == 0)
+        {
+            fprintf(stderr, "Error: ny not defined in config file\n");
+            exit(EXIT_FAILURE);
+        }
+        if (config->iterMaxSmooth <= 0)
+        {
+            fprintf(stderr, "Error: iterMaxSmooth must be greater than 0\n");
+            exit(EXIT_FAILURE);
+        }
+        if (config->tolerSmooth <= 0.0)
+        {
+            fprintf(stderr, "Error: tolerSmooth must be greater than 0.0\n");
+            exit(EXIT_FAILURE);
+        }
     }
 
-    int topoFileCount = 0;
-    for (int i = 0; i < MAXSURF; ++i)
+    if (config->mode & MODE_BACKGROUND_MESH)
     {
-        if (config->topoFiles[i][0] == '\0') break;
-        ++topoFileCount;
-    }
-    int surfaceFaceCount = 0;
-    for (int i = 0; i < MAXSURF; ++i)
-    {
-        if (config->surfaceMeshFaces[i] == 0) break;
-        ++surfaceFaceCount;
-    }
-
-    if (topoFileCount == 0)
-    {
-        fprintf(stderr, "Error: topoFiles not defined in config file\n");
-        exit(EXIT_FAILURE);
-    }
-    if (topoFileCount > 1 && topoFileCount != surfaceFaceCount)
-    {
-        fprintf(stderr, "Error: number of topoFiles (%d) does not match number of surfaceMeshFaces (%d)\n"
-            "If more than one topography file is provided, there must be a corresponding surface face for each file.\n",
-            topoFileCount, surfaceFaceCount);
-        exit(EXIT_FAILURE);
-    }
-    if (surfaceFaceCount == 0)
-    {
-        fprintf(stderr, "Error: surfaceMeshFaces not defined in config file\n");
-        exit(EXIT_FAILURE);
-    }
-    if (config->nx == 0)
-    {
-        fprintf(stderr, "Error: nx not defined in config file\n");
-        exit(EXIT_FAILURE);
-    }
-    if (config->ny == 0)
-    {
-        fprintf(stderr, "Error: ny not defined in config file\n");
-        exit(EXIT_FAILURE);
-    }
-    if (config->iterMaxSmooth <= 0)
-    {
-        fprintf(stderr, "Error: iterMaxSmooth must be greater than 0\n");
-        exit(EXIT_FAILURE);
-    }
-    if (config->tolerSmooth <= 0.0)
-    {
-        fprintf(stderr, "Error: tolerSmooth must be greater than 0.0\n");
-        exit(EXIT_FAILURE);
-    }
-    if (config->resistivityFile[0] == '\0')
-    {
-        fprintf(stderr, "Error: resistivityFile not defined in config file\n");
-        exit(EXIT_FAILURE);
-    }
-    if (config->sourcesFile[0] == '\0')
-    {
-        fprintf(stderr, "Error: sourcesFile not defined in config file\n");
-        exit(EXIT_FAILURE);
-    }
-    if (config->backgroundMeshFile[0] == '\0')
-    {
-        fprintf(stderr, "Error: backgroundMeshFile not defined in config file\n");
-        exit(EXIT_FAILURE);
-    }
-    if (config->frequency <= 0.0)
-    {
-        fprintf(stderr, "Error: frequency must be greater than 0.0\n");
-        exit(EXIT_FAILURE);
-    }
-    if (config->rSkinDepth <= 0.0)
-    {
-        fprintf(stderr, "Error: rSkinDepth must be greater than 0.0\n");
-        exit(EXIT_FAILURE);
-    }
-    if (config->emitterLength <= 0.0)
-    {
-        fprintf(stderr, "Error: emitterLength must be greater than 0.0\n");
-        exit(EXIT_FAILURE);
-    }
-    if (config->rsFactor <= 0.0)
-    {
-        fprintf(stderr, "Error: rsFactor must be greater than 0.0\n");
-        exit(EXIT_FAILURE);
+        if (isnan(config->minResistivity) && config->resistivityFile[0] == '\0')
+        {
+            fprintf(stderr, "Error: minResistivity or resistivityFile not defined in config file\n");
+            exit(EXIT_FAILURE);
+        }
+        if (config->sourcesFile[0] == '\0')
+        {
+            fprintf(stderr, "Error: sourcesFile not defined in config file\n");
+            exit(EXIT_FAILURE);
+        }
+        if (config->backgroundMeshFile[0] == '\0')
+        {
+            fprintf(stderr, "Error: backgroundMeshFile not defined in config file\n");
+            exit(EXIT_FAILURE);
+        }
+        if (config->frequency <= 0.0)
+        {
+            fprintf(stderr, "Error: frequency must be greater than 0.0\n");
+            exit(EXIT_FAILURE);
+        }
+        if (config->rSkinDepth <= 0.0)
+        {
+            fprintf(stderr, "Error: rSkinDepth must be greater than 0.0\n");
+            exit(EXIT_FAILURE);
+        }
+        if (config->emitterLength <= 0.0)
+        {
+            fprintf(stderr, "Error: emitterLength must be greater than 0.0\n");
+            exit(EXIT_FAILURE);
+        }
+        if (config->rsFactor <= 0.0)
+        {
+            fprintf(stderr, "Error: rsFactor must be greater than 0.0\n");
+            exit(EXIT_FAILURE);
+        }
+        if (config->growthFactor <= 0.0)
+        {
+            fprintf(stderr, "Error: growthFactor must be greater than 0.0\n");
+            exit(EXIT_FAILURE);
+        }
     }
 }
 
 void readConfigFile(const char* filename, ConfigFile* config)
 {
     // set default values in case they are not defined
+    config->mode = MODE_ALL;
     config->iterMaxSmooth = 200;
     config->tolerSmooth = 0.01;
+    config->minResistivity = DBL_SNAN;
     config->frequency = 1.0;
     config->rSkinDepth = 2.0;
     config->emitterLength = 1.0;
     config->rsFactor = 10.0;
+    config->growthFactor = 1.25;
 
     FILE* file = fopen(filename, "r");
     if (file == NULL)
@@ -266,6 +313,10 @@ void readConfigFile(const char* filename, ConfigFile* config)
 void printConfigFile(const ConfigFile* config)
 {
     printf("\nConfig file:\n");
+    printf("mode = ");
+    if (config->mode == MODE_ALL) printf("all\n");
+    else if (config->mode == MODE_INTERPOLATE) printf("interpolate\n");
+    else if (config->mode == MODE_BACKGROUND_MESH) printf("background_mesh\n");
     printf("skinMeshFileIn = %s\n", config->skinMeshFileIn);
     printf("skinMeshFileOut = %s\n", config->skinMeshFileOut);
     printf("topoFiles = ");
@@ -293,6 +344,7 @@ void printConfigFile(const ConfigFile* config)
     }
     printf("\niterMaxSmooth = %d\n", config->iterMaxSmooth);
     printf("tolerSmooth = %lf\n", config->tolerSmooth);
+    printf("minResistivity = %f\n", config->minResistivity);
     printf("resistivityFile = %s\n", config->resistivityFile);
     printf("sourcesFile = %s\n", config->sourcesFile);
     printf("backgroundMeshFile = %s\n", config->backgroundMeshFile);
@@ -300,4 +352,5 @@ void printConfigFile(const ConfigFile* config)
     printf("rSkinDepth = %lf\n", config->rSkinDepth);
     printf("emitterLength = %lf\n", config->emitterLength);
     printf("rsFactor = %lf\n", config->rsFactor);
+    printf("growthFactor = %lf\n", config->growthFactor);
 }

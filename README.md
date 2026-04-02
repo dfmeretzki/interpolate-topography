@@ -105,6 +105,14 @@ All parameters are supplied through a plain text file using key = value syntax.
 Lines beginning with # are comments. Multi-value parameters use comma separated lists.
 
 ```bash
+# AMGEM configuration file
+
+# -- Mode of operation --------------------------------------------------------
+# Valid values: all, interpolate, background_mesh
+# interpolate = only perform topography interpolation and smoothing
+# background_mesh = only perform background mesh generation using the input mesh and resistivity model
+mode = all
+
 # -- Topography ---------------------------------------------------------------
 # Paths to topography data files, one per geological surface.
 # Mapped to surfaceMeshFaces in order: 1st file → 1st face, 2nd → 2nd, etc.
@@ -130,6 +138,8 @@ iterMaxSmooth = 200
 tolerSmooth   = 0.01
 
 # -- Resistivity model --------------------------------------------------------
+# Minimum resistivity in ohm-m, if not specified, it will be extracted from the SEG-Y file
+minResistivity = 0.1
 # SEG-Y file with 3D resistivity distribution (used for skin-depth calculation)
 resistivityFile = data/resistivity.segy
 
@@ -153,12 +163,17 @@ emitterLength = 1.0
 # Local element size near sources = emitterLength / rsFactor,
 # capped at the global skin-depth size (default: 10.0)
 rsFactor = 10.0
+
+# Geometric growth factor for element size away from sources (default: 1.25)
+# Element size grows by this factor each layer away from sources center, up to the global size limit with a maximum distance of 3.0 * global element size
+growthFactor = 1.25
 ```
 
 ### Parameter reference
 
 | Parameter | Required | Default | Description |
 |---|---|---|---|
+| `mode` | no | all | Operation mode: all, interpolate, background_mesh |
 | `topoFiles` | yes | — | Comma-separated paths to topography files |
 | `nx`, `ny` | yes | — | Interpolation grid resolution |
 | `skinMeshFileIn` | yes | — | Input boundary mesh (Gmsh `.msh` v1) |
@@ -167,13 +182,17 @@ rsFactor = 10.0
 | `meshFacesToSmooth` | no | — | Face IDs where Laplacian smoothing is applied |
 | `iterMaxSmooth` | no | 200 | Maximum smoothing iterations |
 | `tolerSmooth` | no | 0.01 | Smoothing convergence tolerance |
-| `resistivityFile` | yes | — | SEG-Y resistivity model |
+| `minResistivity` | yes/no* | — | Minimum resistivity in ohm-m (overrides SEG-Y extraction) |
+| `resistivityFile` | yes/no* | — | SEG-Y resistivity model |
 | `sourcesFile` | yes | — | Source/receiver positions (XYZ, one per line) |
 | `backgroundMeshFile` | yes | — | Output Gmsh background mesh (`.pos`) |
 | `frequency` | no | 1.0 | EM survey frequency in Hz |
 | `rSkinDepth` | no | 2.0 | Global element size factor (relative to min skin-depth) |
 | `emitterLength` | no | 1.0 | Emitter dipole length in metres |
 | `rsFactor` | no | 10.0 | Source local refinement factor |
+| `growthFactor` | no | 1.25 | Geometric growth factor for element size away from sources |
+
+*either `minResistivity` or `resistivityFile` must be provided to compute skin-depths.If both are provided, `minResistivity` will be used.
 
 ### Topography file format
 
@@ -207,6 +226,6 @@ Element sizes are determined by two levels:
 
 - Local size: applied near each source/receiver within a radius of $3 \times h_\text{global}$, defined as:  
 
-  $\displaystyle h_\text{local}(d) = \min\left(\frac{L_\text{emitter}}{r_s}, h_\text{global}\right)\cdot{1.25^{\lfloor{d}/{h_\text{global}}\rfloor}}$  
+  $\displaystyle h_\text{local}(d) = \min\left(\frac{L_\text{emitter}}{r_s}, h_\text{global}\right)\cdot{growthFactor^{\lfloor{d}/{h_\text{global}}\rfloor}}$  
 
-Size grows geometrically with distance d from the source with a factor 1.25 per layer.
+Size grows geometrically with distance d from the source with a factor `growthFactor` per layer.

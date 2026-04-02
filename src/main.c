@@ -28,42 +28,48 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
 
-    // Interpolate the topography onto the mesh
-    if (!interpolate(&config, &mesh))
+    if (config.mode & MODE_INTERPOLATE)
     {
-        fprintf(stderr, "Failed to interpolate topography onto the mesh\n");
-        result = EXIT_FAILURE;
-        goto out_free_mesh;
+        // Interpolate the topography onto the mesh
+        if (!interpolate(&config, &mesh))
+        {
+            fprintf(stderr, "Failed to interpolate topography onto the mesh\n");
+            result = EXIT_FAILURE;
+            goto out_free_mesh;
+        }
+
+        // Smooth the mesh faces
+        if (!smoothMesh(&config, &mesh))
+        {
+            fprintf(stderr, "Failed to smooth the mesh faces\n");
+            result = EXIT_FAILURE;
+            goto out_free_mesh;
+        }
+        fprintf(stdout, "Successfully interpolated topography and smoothed the mesh\n");
+
+        // Write the mesh to a .msh file
+        if (!writeMshFile(config.skinMeshFileOut, &mesh, MSH_V1))
+        {
+            fprintf(stderr, "Failed to write the resulting .msh file '%s'\n",
+                config.skinMeshFileOut);
+            result = EXIT_FAILURE;
+            goto out_free_mesh;
+        }
+        fprintf(stdout, "Resulting mesh exported to '%s'\n", config.skinMeshFileOut);
     }
 
-    // Smooth the mesh faces
-    if (!smoothMesh(&config, &mesh))
+    if (config.mode & MODE_BACKGROUND_MESH)
     {
-        fprintf(stderr, "Failed to smooth the mesh faces\n");
-        result = EXIT_FAILURE;
-        goto out_free_mesh;
+       // Generate the background mesh
+        if (!generateBackgroundMesh(&config, &mesh))
+        {
+            fprintf(stderr, "Failed to generate background mesh\n");
+            result = EXIT_FAILURE;
+            goto out_free_mesh;
+        }
+        fprintf(stdout, "Successfully generated background mesh '%s'\n",
+            config.backgroundMeshFile);
     }
-    fprintf(stdout, "Successfully interpolated topography and smoothed the mesh\n");
-
-    // Write the mesh to a .msh file
-    if (!writeMshFile(config.skinMeshFileOut, &mesh, MSH_V1))
-    {
-        fprintf(stderr, "Failed to write the resulting .msh file '%s'\n",
-            config.skinMeshFileOut);
-        result = EXIT_FAILURE;
-        goto out_free_mesh;
-    }
-    fprintf(stdout, "Resulting mesh exported to '%s'\n", config.skinMeshFileOut);
-
-    // Generate the background mesh
-    if (!generateBackgroundMesh(&config))
-    {
-        fprintf(stderr, "Failed to generate background mesh\n");
-        result = EXIT_FAILURE;
-        goto out_free_mesh;
-    }
-    fprintf(stdout, "Successfully generated background mesh '%s'\n",
-        config.backgroundMeshFile);
 
 out_free_mesh:
     freeMesh(&mesh);
