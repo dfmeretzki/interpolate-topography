@@ -14,4 +14,6 @@
 
 int readSEGYFile(const char* filename, Resistivity* res);
 
+int readSEGYMinResistivity(const char* filename, float* minResistivity);
+
 #endif // RESISTIVITY_PARSER_H

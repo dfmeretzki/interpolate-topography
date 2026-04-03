@@ -155,6 +155,10 @@ static void storeValue(const char* restrict key, char* restrict value, ConfigFil
     {
         config->growthFactor = atof(value);
     }
+    else if (strcmp("elemSizeScale", key) == 0)
+    {
+        config->elemSizeScale = atof(value);
+    }
     else
     {
         printf("Found unrecongnized key: %s\n", key);
@@ -271,6 +275,11 @@ void validateConfigFile(const ConfigFile* config)
             fprintf(stderr, "Error: growthFactor must be greater than 0.0\n");
             exit(EXIT_FAILURE);
         }
+        if (config->elemSizeScale <= 0.0)
+        {
+            fprintf(stderr, "Error: elemSizeScale must be greater than 0.0\n");
+            exit(EXIT_FAILURE);
+        }
     }
 }
 
@@ -286,6 +295,7 @@ void readConfigFile(const char* filename, ConfigFile* config)
     config->emitterLength = 1.0;
     config->rsFactor = 10.0;
     config->growthFactor = 1.25;
+    config->elemSizeScale = 1.0;
 
     FILE* file = fopen(filename, "r");
     if (file == NULL)
@@ -353,4 +363,5 @@ void printConfigFile(const ConfigFile* config)
     printf("emitterLength = %lf\n", config->emitterLength);
     printf("rsFactor = %lf\n", config->rsFactor);
     printf("growthFactor = %lf\n", config->growthFactor);
+    printf("elemSizeScale = %lf\n", config->elemSizeScale);
 }

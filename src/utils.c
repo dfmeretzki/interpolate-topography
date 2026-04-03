@@ -26,11 +26,10 @@ void removeSpaces(char* s)
     do
     {
         while (isspace(*x)) ++x;
-    }
-    while ((*s++ = *x++));
+    } while ((*s++ = *x++));
 }
 
-char* skipLeadingSpaces(char* s) 
+char* skipLeadingSpaces(char* s)
 {
     while (isspace(*s)) ++s;
     return s;
@@ -67,6 +66,11 @@ void minMaxElement(const double* array, size_t n, double* min, double* max)
 }
 
 int clampi(int value, int min, int max)
+{
+    return value < min ? min : (value > max ? max : value);
+}
+
+float clampf(float value, float min, float max)
 {
     return value < min ? min : (value > max ? max : value);
 }

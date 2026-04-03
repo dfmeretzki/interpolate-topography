@@ -142,12 +142,15 @@ static int initResistivity(const ConfigFile* config, const Mesh* mesh, Resistivi
 {
     if (isnan(config->minResistivity))
     {
-        if (!readSEGYFile(config->resistivityFile, res))
+        if (!readSEGYMinResistivity(config->resistivityFile, &res->minResistivity))
         {
             fprintf(stderr, "Failed to read resistivity file '%s'\n", config->resistivityFile);
             return 0;
         }
-        return 1;
+    }
+    else
+    {
+        res->minResistivity = (float)config->minResistivity;
     }
 
     getShape(mesh, &res->minX, &res->maxX, &res->minY, &res->maxY, &res->minZ, &res->maxZ);
@@ -157,7 +160,6 @@ static int initResistivity(const ConfigFile* config, const Mesh* mesh, Resistivi
     res->nx = (int)floorf((res->maxX - res->minX) / res->dx) + 1;
     res->ny = (int)floorf((res->maxY - res->minY) / res->dy) + 1;
     res->nz = (int)floorf((res->maxZ - res->minZ) / res->dz) + 1;
-    res->minResistivity = config->minResistivity;
 
     return 1;
 }
@@ -201,22 +203,35 @@ int generateBackgroundMesh(const ConfigFile* config, const Mesh* mesh)
         goto out_free_grid;
     }
 
+    float step = skinSize;
+    float radius = skinSize * 4.0f;
     fprintf(file, "View \"Background Mesh\" {\n");
-    for (int i = 0; i <= res.nx; ++i)
+    for (size_t n = 0; n < nNodes; ++n)
     {
-        float x = res.minX + i * res.dx;
-        for (int j = 0; j <= res.ny; ++j)
-        {
-            float y = res.minY + j * res.dy;
-            for (int k = 0; k <= res.nz; ++k)
-            {
-                float z = res.minZ + k * res.dz;
-                float size = elementSize(&grid, nodes, config->growthFactor,
-                    x, y, z, skinSize, sourceSize);
-                fprintf(file, "SP(%f,%f,%f){%f};\n", x, y, z, size);
-            }
-        }
+        float x = nodes[n].x;
+        float y = nodes[n].y;
+        float z = nodes[n].z;
 
+        float iMin = clampf(x - radius, res.minX, res.maxX);
+        float iMax = clampf(x + radius + 1.0f, res.minX, res.maxX);
+        for (float i = iMin; i <= iMax; i += step)
+        {
+            float jMin = clampf(y - radius, res.minY, res.maxY);
+            float jMax = clampf(y + radius + 1.0f, res.minY, res.maxY);
+            for (float j = jMin; j <= jMax; j += step)
+            {
+                float kMin = clampf(z - radius, res.minZ, res.maxZ);
+                float kMax = clampf(z + radius + 1.0f, res.minZ, res.maxZ);
+                for (float k = kMin; k <= kMax; k += step)
+                {
+                    float size = elementSize(&grid, nodes, config->growthFactor,
+                        i, j, k, skinSize, sourceSize);
+                    size *= config->elemSizeScale;
+                    fprintf(file, "SP(%f,%f,%f){%f};\n", i, j, k, size);
+                }
+            }
+
+        }
     }
     fprintf(file, "};\n");
 

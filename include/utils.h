@@ -23,4 +23,6 @@ void minMaxElement(const double* array, size_t n, double* min, double* max);
 
 int clampi(int value, int min, int max);
 
+float clampf(float value, float min, float max);
+
 #endif

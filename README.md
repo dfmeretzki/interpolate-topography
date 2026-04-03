@@ -167,6 +167,9 @@ rsFactor = 10.0
 # Geometric growth factor for element size away from sources (default: 1.25)
 # Element size grows by this factor each layer away from sources center, up to the global size limit with a maximum distance of 3.0 * global element size
 growthFactor = 1.25
+
+# Optional scaling factor applied to all element sizes in the background mesh (default: 1.0, no scaling)
+elemSizeScale = 1.0
 ```
 
 ### Parameter reference
@@ -191,7 +194,7 @@ growthFactor = 1.25
 | `emitterLength` | no | 1.0 | Emitter dipole length in metres |
 | `rsFactor` | no | 10.0 | Source local refinement factor |
 | `growthFactor` | no | 1.25 | Geometric growth factor for element size away from sources |
-
+| `elemSizeScale` | no | 1.0 | Optional scaling factor applied to all element sizes in the background mesh |
 *either `minResistivity` or `resistivityFile` must be provided to compute skin-depths.If both are provided, `minResistivity` will be used.
 
 ### Topography file format

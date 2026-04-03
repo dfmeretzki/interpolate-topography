@@ -255,3 +255,73 @@ out_close_file:
     segy_close(sf);
     return result;
 }
+
+int readSEGYMinResistivity(const char* filename, float* minResistivity)
+{
+    int result = 1;
+    segy_file* sf = segy_open(filename, "r");
+    if (sf == NULL)
+    {
+        fprintf(stderr, "Could not open SEG-Y file: %s\n", filename);
+        return 0;
+    }
+
+    int binHeaderSize = segy_binheader_size();
+    char binHeader[binHeaderSize];
+    if (segy_binheader(sf, binHeader) != SEGY_OK)
+    {
+        fprintf(stderr, "Error reading binary header from SEG-Y file: %s\n", filename);
+        result = 0;
+        goto out_close_file;
+    }
+
+    int samples = segy_samples(binHeader);
+    int format = segy_format(binHeader);
+    int traceBSize = segy_trace_bsize(samples);
+    long traceOffset = segy_trace0(binHeader);
+    int totalTraces;
+    if (segy_traces(sf, &totalTraces, traceOffset, traceBSize) != SEGY_OK)
+    {
+        fprintf(stderr, "Error counting traces in SEG-Y file: %s\n", filename);
+        result = 0;
+        goto out_close_file;
+    }
+
+    *minResistivity = FLT_MAX;
+
+    float* trBuf = malloc(traceBSize);
+    if (trBuf == NULL)
+    {
+        fprintf(stderr, "Memory allocation failed for trace buffer\n");
+        result = 0;
+        goto out_close_file;
+    }
+
+    for (int i = 0; i < totalTraces; ++i)
+    {
+        if (segy_readtrace(sf, i, trBuf, traceOffset, traceBSize) != 0)
+        {
+            fprintf(stderr, "Error reading trace data for trace %d\n", i);
+            result = 0;
+            goto out_free_trbuf;
+        }
+
+        if (segy_to_native(format, samples, trBuf) != 0)
+        {
+            fprintf(stderr, "Error converting trace data to native format for trace %d\n", i);
+            result = 0;
+            goto out_free_trbuf;
+        }
+
+        for (int j = 0; j < samples; ++j)
+        {
+            if (trBuf[j] < *minResistivity) *minResistivity = trBuf[j];
+        }
+    }
+
+out_free_trbuf:
+    free(trBuf);
+out_close_file:
+    segy_close(sf);
+    return result;
+}

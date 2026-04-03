@@ -48,6 +48,7 @@ typedef struct
     double emitterLength;                        // default value = 1.0
     double rsFactor;                             // default value = 10.0
     double growthFactor;                         // default value = 1.25
+    double elemSizeScale;                        // default value = 1.0
 } ConfigFile;
 
 void readConfigFile(const char* filename, ConfigFile* config);
