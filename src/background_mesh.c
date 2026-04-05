@@ -32,6 +32,7 @@ typedef struct
     int nx, ny, nz;
     float minX, minY, minZ;
     float h;
+    float layer;
     NodeBin** bins;
 } BinGrid;
 
@@ -57,14 +58,16 @@ static void freeBinGrid(BinGrid* grid)
 }
 
 static int buildBinGrid(BinGrid* grid, const Node* nodes, size_t nNodes,
-    float minX, float maxX, float minY, float maxY, float minZ, float maxZ, float radius)
+    float minX, float maxX, float minY, float maxY, float minZ, float maxZ, float skinDepth)
 {
     int result = 1;
 
+    float radius = skinDepth * 3.0f;
     grid->minX = minX;
     grid->minY = minY;
     grid->minZ = minZ;
     grid->h = radius;
+    grid->layer = skinDepth;
     grid->nx = (int)floorf((maxX - minX) / radius) + 1;
     grid->ny = (int)floorf((maxY - minY) / radius) + 1;
     grid->nz = (int)floorf((maxZ - minZ) / radius) + 1;
@@ -127,7 +130,7 @@ static float elementSize(const BinGrid* grid, const Node* nodes, float growthFac
                     float d = (float)fmax(fabs(x - n->x), fmax(fabs(y - n->y), fabs(z - n->z)));
                     if (d > grid->h) continue;
 
-                    int layer = (int)floorf(d / skinSize);
+                    int layer = (int)floorf(d / grid->layer);
                     float sSize = sourceSize * powf(growthFactor, (float)layer);
                     if (sSize < size) size = sSize;
                 }
@@ -185,9 +188,8 @@ int generateBackgroundMesh(const ConfigFile* config, const Mesh* mesh)
     float sourceSize = fminimum(config->emitterLength / config->rsFactor, skinSize);
 
     BinGrid grid = { 0 };
-    float sourceRadius = skinSize * 3.0f;
     if (nNodes > 0 && !buildBinGrid(&grid, nodes, nNodes, res.minX, res.maxX,
-        res.minY, res.maxY, res.minZ, res.maxZ, sourceRadius))
+        res.minY, res.maxY, res.minZ, res.maxZ, minSkinDepth))
     {
         fprintf(stderr, "Failed to build bin grid\n");
         result = 0;
@@ -203,8 +205,8 @@ int generateBackgroundMesh(const ConfigFile* config, const Mesh* mesh)
         goto out_free_grid;
     }
 
-    float step = skinSize;
-    float radius = skinSize * 4.0f;
+    float step = minSkinDepth / 2.0f;
+    float radius = minSkinDepth * 4.0f;
     fprintf(file, "View \"Background Mesh\" {\n");
     for (size_t n = 0; n < nNodes; ++n)
     {
